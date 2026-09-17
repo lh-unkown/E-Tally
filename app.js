@@ -197,6 +197,7 @@ function switchSubTab(subTab) {
   } else if (subTab === 'export') {
     document.getElementById("subTabExportBtn").classList.add("active");
     document.getElementById("subViewExport").classList.remove("hidden");
+    loadExportChassisGrid();
   } else if (subTab === 'update') {
     document.getElementById("subTabUpdateBtn").classList.add("active");
     document.getElementById("subViewUpdate").classList.remove("hidden");
@@ -204,6 +205,47 @@ function switchSubTab(subTab) {
   } else if (subTab === 'security') {
     document.getElementById("subTabSecurityBtn").classList.add("active");
     document.getElementById("subViewSecurity").classList.remove("hidden");
+  }
+}
+
+async function loadExportChassisGrid() {
+  const container = document.getElementById("exportChassisGrid");
+  if (!container) return;
+
+  try {
+    const res = await fetch("/api/chassis");
+    const data = await res.json();
+    if (data.success) {
+      const exportList = data.chassis;
+      container.innerHTML = "";
+      exportList.forEach(c => {
+        const card = document.createElement("div");
+        card.className = "chassis-card";
+        card.style.cssText = "cursor:pointer;";
+        card.onclick = () => {
+          switchSubTab('onboard');
+          selectChassis(c);
+        };
+        card.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <span style="font-weight: 800; font-size: 1.05rem; color: var(--hipg-blue);">${c.vin}</span>
+              <span style="font-size: 0.75rem; color: #64748B; margin-left: 0.4rem;">(Export Gate Pre-Advised)</span>
+            </div>
+            <span class="status-pill verified">Gate Received</span>
+          </div>
+          <div style="font-size: 0.85rem; margin-top: 0.4rem; color: var(--hipg-text);">
+            Model: <strong>${c.model}</strong> | ${c.brand_new_used} | ${c.color}
+          </div>
+          <div style="font-size: 0.78rem; color: var(--hipg-muted); margin-top: 0.3rem;">
+            Destination Vessel: HOEGH STRIKER (Voyage 108) | Yard Location: ${c.yard} (${c.row_lane})
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+  } catch (err) {
+    console.error("Error loading export chassis:", err);
   }
 }
 
