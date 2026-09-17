@@ -542,7 +542,9 @@ async function selectChassis(chassis) {
   document.getElementById("activeVinModelLabel").innerText = `(${chassis.model} - ${chassis.color})`;
   document.getElementById("activeVinTallyStatus").innerText = chassis.tally_status;
 
-  let isVerifiedRecord = false;
+  let isConfirmedRecord = false;
+  let isPendingApproval = (chassis.tally_status === 'Pending Approval');
+  let isSecurityVerified = false;
 
   try {
     const res = await fetch(`/api/tally/${chassis.vin}`);
@@ -555,8 +557,14 @@ async function selectChassis(chassis) {
       recordedDamages = [...activeTallyData.damages];
       savedPhotos = [...activeTallyData.photos];
 
-      if (data.tally.status === 'Verified' || data.tally.status === 'Confirmed' || chassis.tally_status === 'Verified' || chassis.tally_status === 'Confirmed' || (data.security && data.security.status === 'Verified')) {
-        isVerifiedRecord = true;
+      if (data.tally.status === 'Confirmed' || data.tally.status === 'Verified' || chassis.tally_status === 'Confirmed' || chassis.tally_status === 'Verified') {
+        isConfirmedRecord = true;
+      }
+      if (data.tally.status === 'Pending Approval') {
+        isPendingApproval = true;
+      }
+      if (data.security && data.security.status === 'Verified') {
+        isSecurityVerified = true;
       }
     } else {
       activeTallyData.accessories = {};
@@ -566,8 +574,8 @@ async function selectChassis(chassis) {
       recordedDamages = [];
       savedPhotos = [];
 
-      if (chassis.tally_status === 'Verified' || chassis.tally_status === 'Confirmed') {
-        isVerifiedRecord = true;
+      if (chassis.tally_status === 'Confirmed' || chassis.tally_status === 'Verified') {
+        isConfirmedRecord = true;
       }
     }
   } catch (err) {
@@ -575,9 +583,11 @@ async function selectChassis(chassis) {
   }
 
   const isAdmin = currentUser && currentUser.role === "Admin";
-  isCurrentTallyReadOnly = isVerifiedRecord && !isAdmin;
+  const isSupervisor = currentUser && currentUser.role === "Supervisor";
 
-  applyTallyFormReadonlyState(isVerifiedRecord, isAdmin);
+  isCurrentTallyReadOnly = isConfirmedRecord && !isAdmin;
+
+  applyTallyFormReadonlyState(isConfirmedRecord, isPendingApproval, isSecurityVerified, isAdmin, isSupervisor);
 
   renderAccessoriesChecklist();
   renderRecordedDamages();
@@ -585,7 +595,7 @@ async function selectChassis(chassis) {
   goToStep('accessories');
 }
 
-function applyTallyFormReadonlyState(isVerifiedRecord, isAdmin) {
+function applyTallyFormReadonlyState(isConfirmedRecord, isPendingApproval, isSecurityVerified, isAdmin, isSupervisor) {
   let bannerContainer = document.getElementById("tallyReadonlyStatusBanner");
   if (!bannerContainer) {
     bannerContainer = document.createElement("div");
@@ -596,22 +606,37 @@ function applyTallyFormReadonlyState(isVerifiedRecord, isAdmin) {
     }
   }
 
-  const isReadOnly = isVerifiedRecord && !isAdmin;
+  const isReadOnly = isConfirmedRecord && !isAdmin;
 
   if (isReadOnly) {
     bannerContainer.style.cssText = "background:#FEF2F2; border:2px solid #EF4444; padding:0.85rem 1rem; border-radius:8px; margin-bottom:1rem; color:#991B1B; font-size:0.9rem;";
     bannerContainer.innerHTML = `
-      <strong>🔒 VERIFIED RECORD (VIEW ONLY)</strong><br>
-      This vehicle record is <strong>Verified & Locked</strong>. Only <strong>Admin users</strong> are authorized to edit or delete verified records. Supervisors and Surveyors have View-Only access.
+      <strong>🔒 CONFIRMED & LOCKED RECORD (VIEW ONLY)</strong><br>
+      This vehicle tally record has been <strong>Confirmed & Locked</strong>. Only <strong>Admin users</strong> are authorized to edit or delete confirmed records. Supervisors and Surveyors have View-Only access.
     `;
-  } else if (isVerifiedRecord && isAdmin) {
+  } else if (isConfirmedRecord && isAdmin) {
     bannerContainer.style.cssText = "background:#EFF6FF; border:2px solid #3B82F6; padding:0.85rem 1rem; border-radius:8px; margin-bottom:1rem; color:#1E3A8A; font-size:0.9rem; display:flex; justify-content:space-between; align-items:center;";
     bannerContainer.innerHTML = `
       <div>
-        <strong>✏️ VERIFIED RECORD (ADMIN EDIT & DELETE MODE)</strong><br>
-        You are logged in as <strong>Admin</strong>. You have full authorization to edit or delete this verified record.
+        <strong>✏️ CONFIRMED RECORD (ADMIN EDIT & DELETE MODE)</strong><br>
+        You are logged in as <strong>Admin</strong>. You have full authorization to edit or delete this confirmed record.
       </div>
-      <button class="btn btn-danger" style="padding:0.4rem 0.85rem; font-size:0.82rem; font-weight:700;" onclick="adminPurgeCurrentChassis('${selectedChassis ? selectedChassis.vin : ''}')">🗑️ Delete Verified Record</button>
+      <button class="btn btn-danger" style="padding:0.4rem 0.85rem; font-size:0.82rem; font-weight:700;" onclick="adminPurgeCurrentChassis('${selectedChassis ? selectedChassis.vin : ''}')">🗑️ Delete Confirmed Record</button>
+    `;
+  } else if (isPendingApproval) {
+    const secBadge = isSecurityVerified
+      ? `<span class="status-pill verified" style="font-size:0.8rem; background:#DCFCE7; color:#166534; border:1px solid #86EFAC;">🛡️ Security Check Verified</span>`
+      : `<span class="status-pill warning" style="font-size:0.8rem; background:#FEF3C7; color:#92400E; border:1px solid #FCD34D;">⏳ Pending Security Officer Check</span>`;
+
+    bannerContainer.style.cssText = "background:#FEF3C7; border:2px solid #F59E0B; padding:0.85rem 1rem; border-radius:8px; margin-bottom:1rem; color:#92400E; font-size:0.9rem; display:flex; justify-content:space-between; align-items:center;";
+    bannerContainer.innerHTML = `
+      <div>
+        <strong>⏳ PENDING SUPERVISOR APPROVAL</strong><br>
+        This tally sheet was submitted by Surveyor and is awaiting Supervisor Approval.
+      </div>
+      <div>
+        ${secBadge}
+      </div>
     `;
   } else {
     bannerContainer.style.cssText = "display:none;";
@@ -644,17 +669,40 @@ function applyTallyFormReadonlyState(isVerifiedRecord, isAdmin) {
       btnConfirmFinalTally.disabled = true;
       btnConfirmFinalTally.style.opacity = "0.5";
       btnConfirmFinalTally.style.cursor = "not-allowed";
-      btnConfirmFinalTally.innerHTML = "🔒 Record Verified (View Only)";
-    } else if (isVerifiedRecord && isAdmin) {
+      btnConfirmFinalTally.className = "btn btn-secondary";
+      btnConfirmFinalTally.innerHTML = "🔒 Record Confirmed (View Only)";
+      btnConfirmFinalTally.onclick = confirmFinalTallySheet;
+    } else if (isPendingApproval && (isSupervisor || isAdmin)) {
+      if (isSecurityVerified) {
+        btnConfirmFinalTally.disabled = false;
+        btnConfirmFinalTally.style.opacity = "1";
+        btnConfirmFinalTally.style.cursor = "pointer";
+        btnConfirmFinalTally.className = "btn btn-success";
+        btnConfirmFinalTally.innerHTML = "✅ Approve & Lock Tally Sheet";
+        btnConfirmFinalTally.onclick = () => approveTallyAsSupervisor(selectedChassis.vin);
+      } else {
+        btnConfirmFinalTally.disabled = true;
+        btnConfirmFinalTally.style.opacity = "0.6";
+        btnConfirmFinalTally.style.cursor = "not-allowed";
+        btnConfirmFinalTally.className = "btn btn-secondary";
+        btnConfirmFinalTally.innerHTML = "🔒 Pending Security Check";
+        btnConfirmFinalTally.title = "Security Officer must complete Security Check before Supervisor can approve";
+        btnConfirmFinalTally.onclick = null;
+      }
+    } else if (isConfirmedRecord && isAdmin) {
       btnConfirmFinalTally.disabled = false;
       btnConfirmFinalTally.style.opacity = "1";
       btnConfirmFinalTally.style.cursor = "pointer";
-      btnConfirmFinalTally.innerHTML = "💾 Update Verified Record (Admin Override)";
+      btnConfirmFinalTally.className = "btn btn-warning";
+      btnConfirmFinalTally.innerHTML = "💾 Update Confirmed Record (Admin Override)";
+      btnConfirmFinalTally.onclick = confirmFinalTallySheet;
     } else {
       btnConfirmFinalTally.disabled = false;
       btnConfirmFinalTally.style.opacity = "1";
       btnConfirmFinalTally.style.cursor = "pointer";
-      btnConfirmFinalTally.innerHTML = "🔒 Confirm & Lock Tally Sheet";
+      btnConfirmFinalTally.className = "btn btn-success";
+      btnConfirmFinalTally.innerHTML = "🔒 Confirm & Submit Tally Sheet";
+      btnConfirmFinalTally.onclick = confirmFinalTallySheet;
     }
   }
 }
