@@ -62,17 +62,64 @@ function unlockSystemForUser(user) {
 
   document.getElementById("loggedInUserBadge").innerText = `${user.name} [${user.role}]`;
 
-  if (user.role === "Admin") {
-    document.getElementById("tabAdminBtn").classList.remove("hidden");
-  } else {
-    document.getElementById("tabAdminBtn").classList.add("hidden");
-  }
+  applyRoleRestrictions(user);
 
   initCanvas();
   loadVessels();
   renderAccessoriesChecklist();
   renderDamageCodes();
-  runInquireSearch("268273");
+  runInquireSearch(""); // Empty query on login: do not show any VIN until user searches
+}
+
+function applyRoleRestrictions(user) {
+  const role = user ? user.role : "Surveyor";
+
+  const tabIssueBtn = document.getElementById("tabIssueBtn");
+  const tabInquireBtn = document.getElementById("tabInquireBtn");
+  const tabGenerateBtn = document.getElementById("tabGenerateBtn");
+  const tabAdminBtn = document.getElementById("tabAdminBtn");
+
+  const subTabOnboardBtn = document.getElementById("subTabOnboardBtn");
+  const subTabExportBtn = document.getElementById("subTabExportBtn");
+  const subTabUpdateBtn = document.getElementById("subTabUpdateBtn");
+  const subTabSecurityBtn = document.getElementById("subTabSecurityBtn");
+
+  if (tabIssueBtn) tabIssueBtn.classList.remove("hidden");
+  if (tabInquireBtn) tabInquireBtn.classList.remove("hidden");
+  if (tabGenerateBtn) tabGenerateBtn.classList.remove("hidden");
+  if (tabAdminBtn) tabAdminBtn.classList.add("hidden");
+
+  if (subTabOnboardBtn) subTabOnboardBtn.classList.remove("hidden");
+  if (subTabExportBtn) subTabExportBtn.classList.remove("hidden");
+  if (subTabUpdateBtn) subTabUpdateBtn.classList.remove("hidden");
+  if (subTabSecurityBtn) subTabSecurityBtn.classList.remove("hidden");
+
+  if (role === "Admin") {
+    if (tabAdminBtn) tabAdminBtn.classList.remove("hidden");
+    switchMainTab("issue");
+  } else if (role === "Supervisor") {
+    if (tabAdminBtn) tabAdminBtn.classList.add("hidden");
+    switchMainTab("issue");
+    switchSubTab("onboard");
+  } else if (role === "Surveyor") {
+    if (tabAdminBtn) tabAdminBtn.classList.add("hidden");
+    if (subTabSecurityBtn) subTabSecurityBtn.classList.add("hidden");
+    switchMainTab("issue");
+    switchSubTab("onboard");
+  } else if (role === "Security") {
+    if (tabGenerateBtn) tabGenerateBtn.classList.add("hidden");
+    if (tabAdminBtn) tabAdminBtn.classList.add("hidden");
+    if (subTabOnboardBtn) subTabOnboardBtn.classList.add("hidden");
+    if (subTabExportBtn) subTabExportBtn.classList.add("hidden");
+    if (subTabUpdateBtn) subTabUpdateBtn.classList.add("hidden");
+    switchMainTab("issue");
+    switchSubTab("security");
+  } else if (role === "Driver") {
+    if (tabIssueBtn) tabIssueBtn.classList.add("hidden");
+    if (tabGenerateBtn) tabGenerateBtn.classList.add("hidden");
+    if (tabAdminBtn) tabAdminBtn.classList.add("hidden");
+    switchMainTab("inquire");
+  }
 }
 
 // Portal Login Handler
@@ -999,9 +1046,21 @@ function renderOfficialTallyPreview(targetContainerId, chassisObj, tallyData) {
 }
 
 async function runInquireSearch(preQuery) {
-  const query = preQuery || document.getElementById("inquireInput").value.trim();
+  const query = (preQuery !== undefined && preQuery !== null) ? preQuery : document.getElementById("inquireInput").value.trim();
+  const container = document.getElementById("inquireResultsContainer");
+
   if (!query) {
-    alert("Please enter last 6 digits of VIN or full VIN.");
+    if (container) {
+      container.innerHTML = `
+        <div style="padding: 3.5rem 1.5rem; text-align: center; color: var(--hipg-muted); background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 10px; margin-top: 1rem;">
+          <div style="font-size: 2.8rem; margin-bottom: 0.5rem; opacity: 0.7;">🔍</div>
+          <h4 style="color: var(--hipg-navy); font-weight: 800; font-size: 1.15rem;">No Vehicle Selected</h4>
+          <p style="font-size: 0.88rem; max-width: 480px; margin: 0.4rem auto 0; color: #64748B;">
+            Please enter the last 6 digits or full Chassis VIN in the search box above to inspect the official digital e-Tally sheet and audit trail.
+          </p>
+        </div>
+      `;
+    }
     return;
   }
 
