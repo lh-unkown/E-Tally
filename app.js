@@ -1272,9 +1272,26 @@ function createCrispPdf(c, tally, audit) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF("p", "mm", "a4");
 
-  const acc = (tally && tally.accessories_json) ? tally.accessories_json : {};
-  const dmgs = (tally && tally.damages_json) ? tally.damages_json : [];
-  const photos = (tally && tally.photos_json) ? tally.photos_json : [];
+  const acc = (tally && tally.accessories_json) ? tally.accessories_json : (tally && tally.accessories ? tally.accessories : {});
+  const dmgs = (tally && tally.damages_json) ? tally.damages_json : (tally && tally.damages ? tally.damages : []);
+  
+  let photos = [];
+  if (tally) {
+    if (Array.isArray(tally.photos)) {
+      photos = tally.photos;
+    } else if (Array.isArray(tally.photos_json)) {
+      photos = tally.photos_json;
+    } else if (typeof tally.photos_json === 'string') {
+      try { photos = JSON.parse(tally.photos_json); } catch(e) {}
+    } else if (typeof tally.photos === 'string') {
+      try { photos = JSON.parse(tally.photos); } catch(e) {}
+    }
+  }
+
+  if ((!photos || photos.length === 0) && selectedChassis && c && selectedChassis.vin === c.vin && savedPhotos && savedPhotos.length > 0) {
+    photos = savedPhotos;
+  }
+
   const remarks = (tally && tally.remarks) ? tally.remarks : "None";
 
   const getCheck = (key) => (acc[key] ? "YES" : "NO");
@@ -1429,24 +1446,47 @@ function createCrispPdf(c, tally, audit) {
   doc.setTextColor(30, 41, 59);
   doc.text(remarks, 40, y + 4);
 
-  y += 13;
+  y += 12;
   if (photos && photos.length > 0) {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8.5);
     doc.setTextColor(15, 45, 89);
-    doc.text("DAMAGE EVIDENCE PHOTOGRAPHS:", 12, y);
-    y += 3;
+    doc.text("ATTACHED DAMAGE PHOTOGRAPHS & ANNOTATIONS:", 12, y);
+    y += 4;
 
     let photoX = 12;
-    photos.forEach(p => {
-      try {
-        doc.addImage(p.url, "PNG", photoX, y, 50, 35);
-        doc.rect(photoX, y, 50, 35, "S");
-        doc.setFontSize(6.5);
-        doc.setFont("helvetica", "normal");
-        doc.text(p.caption || "Damage", photoX + 2, y + 38);
-        photoX += 58;
-      } catch (e) {}
+    photos.forEach((p, idx) => {
+      const imgUrl = (typeof p === "string") ? p : (p.url || p.dataUrl || p.src || p.data_url);
+      const captionText = (typeof p === "object" && p.caption) ? p.caption : `Damage Evidence #${idx + 1}`;
+
+      if (imgUrl && typeof imgUrl === "string") {
+        try {
+          let format = "PNG";
+          if (imgUrl.toLowerCase().includes("image/jpeg") || imgUrl.toLowerCase().includes("image/jpg")) {
+            format = "JPEG";
+          } else if (imgUrl.toLowerCase().includes("image/webp")) {
+            format = "WEBP";
+          }
+
+          if (photoX + 55 > 195) {
+            photoX = 12;
+            y += 42;
+          }
+
+          doc.addImage(imgUrl, format, photoX, y, 50, 32);
+          doc.setDrawColor(203, 213, 225);
+          doc.rect(photoX, y, 50, 32, "S");
+
+          doc.setFontSize(6.5);
+          doc.setFont("helvetica", "normal");
+          doc.setTextColor(30, 41, 59);
+          doc.text(captionText.substring(0, 35), photoX + 2, y + 36);
+
+          photoX += 56;
+        } catch (e) {
+          console.error("Error embedding photo into PDF:", e);
+        }
+      }
     });
     y += 42;
   }
