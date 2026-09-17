@@ -9,6 +9,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import database
+import sync_engine
 
 class handler(BaseHTTPRequestHandler):
 
@@ -130,6 +131,13 @@ class handler(BaseHTTPRequestHandler):
                 rows = [dict(r) for r in cursor.fetchall()]
                 return self.send_json({"success": True, "audit_logs": rows})
 
+            elif path.endswith("/api/sync/status"):
+                cursor.execute("SELECT status, COUNT(*) as count FROM sync_outbox GROUP BY status")
+                counts = {r["status"]: r["count"] for r in cursor.fetchall()}
+                cursor.execute("SELECT * FROM sync_outbox ORDER BY id DESC LIMIT 20")
+                recent = [dict(r) for r in cursor.fetchall()]
+                return self.send_json({"success": True, "outbox_counts": counts, "recent_events": recent})
+
             else:
                 return self.send_json({"success": False, "message": f"Unknown API endpoint: {path}"}, 404)
 
@@ -162,6 +170,14 @@ class handler(BaseHTTPRequestHandler):
                     return self.send_json({"success": True, "user": user_dict})
                 else:
                     return self.send_json({"success": False, "message": "Invalid username or password"}, 401)
+
+            elif path.endswith("/api/sync/trigger"):
+                res = sync_engine.process_outbox_queue()
+                return self.send_json({"success": True, "sync_result": res})
+
+            elif path.endswith("/api/external/manifest"):
+                res = sync_engine.import_vessel_manifest(data)
+                return self.send_json(res)
 
             elif path.endswith("/api/users"):
                 username = data.get("username", "").strip()
@@ -221,6 +237,18 @@ class handler(BaseHTTPRequestHandler):
                 """, (vin, "Onboard" if tally_type == "ONBOARD" else "Yard Update", user_id, "Surveyor", now_str, f"Tally Sheet {status} (Doc Ref: {doc_ref})"))
 
                 cursor.execute("UPDATE update_approvals SET status = 'COMPLETED' WHERE vin = ? AND status = 'APPROVED'", (vin,))
+
+                database.queue_sync_event(cursor, "TALLY_CONFIRMED", vin, {
+                    "vin": vin,
+                    "doc_ref": doc_ref,
+                    "vessel_id": vessel_id,
+                    "status": status,
+                    "accessories": data.get("accessories", {}),
+                    "damages": data.get("damages", []),
+                    "remarks": remarks,
+                    "user_id": user_id,
+                    "timestamp": now_str
+                })
 
                 conn.commit()
                 return self.send_json({"success": True, "message": f"Tally Sheet {status} successfully", "vin": vin})
@@ -323,6 +351,15 @@ class handler(BaseHTTPRequestHandler):
                 cursor.execute("""
                     INSERT INTO audit_trail (vin, work_point, user_id, user_role, timestamp, details) VALUES (?, ?, ?, ?, ?, ?)
                 """, (vin, "Security Check", user_id, "Security Officer", now_str, f"Security Check: {sec_status}. Remarks: {remarks}"))
+
+                database.queue_sync_event(cursor, "SECURITY_VERIFIED", vin, {
+                    "vin": vin,
+                    "status": sec_status,
+                    "discrepancies": data.get("discrepancies", []),
+                    "remarks": remarks,
+                    "user_id": user_id,
+                    "timestamp": now_str
+                })
 
                 conn.commit()
                 return self.send_json({"success": True, "message": f"Security check recorded as {sec_status}"})

@@ -130,9 +130,30 @@ def init_db():
         )
     """)
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS sync_outbox (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            event_type TEXT NOT NULL,
+            vin TEXT NOT NULL,
+            payload_json TEXT NOT NULL,
+            status TEXT DEFAULT 'PENDING',
+            retry_count INTEGER DEFAULT 0,
+            last_error TEXT,
+            created_at TEXT NOT NULL,
+            synced_at TEXT
+        )
+    """)
+
     conn.commit()
     seed_data(conn)
     conn.close()
+
+def queue_sync_event(cursor, event_type, vin, payload_dict):
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    cursor.execute("""
+        INSERT INTO sync_outbox (event_type, vin, payload_json, status, retry_count, created_at)
+        VALUES (?, ?, ?, 'PENDING', 0, ?)
+    """, (event_type, vin, json.dumps(payload_dict), now_str))
 
 def seed_data(conn):
     cursor = conn.cursor()
