@@ -1,0 +1,1512 @@
+/* HIPG e-Tally System Client Application Script */
+
+const HIPG_LOGO_BASE64 = "data:image/png;base64,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";
+
+// Global State
+let currentUser = null;
+let currentUserRole = null;
+let currentVessels = [];
+let currentChassisList = [];
+let selectedVessel = null;
+let selectedChassis = null;
+let currentTallyMode = "MANUAL";
+
+let activeTallyData = { accessories: {}, damages: [], photos: [], remarks: "", doc_ref: "20586" };
+let recordedDamages = [];
+let savedPhotos = [];
+let drawingCanvas = null;
+let canvasCtx = null;
+let isDrawing = false;
+let canvasImageLoaded = false;
+
+const STANDARD_ACCESSORIES = [
+  "MONO GRAM", "WIPERS", "TOW CAP", "SIDE MIRROR - RIGHT", "SIDE MIRROR - LEFT",
+  "HUB CAPS", "WHEEL CUP", "ANTENNA", "SPARE TYRE", "WHEEL BRUSH", "JACK",
+  "TOOL KIT", "AIR PUMP", "GUM BOTTLE", "REVERSE CAMERA", "ALLOY",
+  "A_C_NOB", "GEAR NOB", "CAR AUDIO", "TV SCREEN - FRONT", "TV SCREEN - REAR",
+  "CARPETS", "DR CAMERA", "PERSONNEL PKG", "NORMAL_KEY", "REMOTE_KEY", "SMART_KEY"
+];
+
+document.addEventListener("DOMContentLoaded", () => {
+  checkSessionState();
+});
+
+// Mandatory Session State Checker
+function checkSessionState() {
+  const savedUserJson = sessionStorage.getItem("hipg_etally_user");
+  if (savedUserJson) {
+    try {
+      currentUser = JSON.parse(savedUserJson);
+      unlockSystemForUser(currentUser);
+    } catch (e) {
+      lockSystemPortal();
+    }
+  } else {
+    lockSystemPortal();
+  }
+}
+
+function lockSystemPortal() {
+  currentUser = null;
+  currentUserRole = null;
+  document.getElementById("loginPortal").classList.remove("hidden");
+  document.getElementById("appProtectedWrapper").classList.add("hidden");
+}
+
+function unlockSystemForUser(user) {
+  currentUser = user;
+  currentUserRole = `${user.role} (${user.name})`;
+
+  document.getElementById("loginPortal").classList.add("hidden");
+  document.getElementById("appProtectedWrapper").classList.remove("hidden");
+
+  document.getElementById("loggedInUserBadge").innerText = `${user.name} [${user.role}]`;
+
+  if (user.role === "Admin") {
+    document.getElementById("tabAdminBtn").classList.remove("hidden");
+  } else {
+    document.getElementById("tabAdminBtn").classList.add("hidden");
+  }
+
+  initCanvas();
+  loadVessels();
+  renderAccessoriesChecklist();
+  renderDamageCodes();
+  runInquireSearch("268273");
+}
+
+// Portal Login Handler
+async function handlePortalLogin(event) {
+  event.preventDefault();
+  const u = document.getElementById("portalUsername").value.trim();
+  const p = document.getElementById("portalPassword").value.trim();
+
+  document.getElementById("loginErrorAlert").classList.add("hidden");
+
+  try {
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: u, password: p })
+    });
+    const data = await res.json();
+    if (data.success) {
+      sessionStorage.setItem("hipg_etally_user", JSON.stringify(data.user));
+      unlockSystemForUser(data.user);
+    } else {
+      document.getElementById("loginErrorAlert").classList.remove("hidden");
+    }
+  } catch (err) {
+    console.error("Portal login error:", err);
+    document.getElementById("loginErrorAlert").classList.remove("hidden");
+  }
+}
+
+function quickLogin(username, password) {
+  document.getElementById("portalUsername").value = username;
+  document.getElementById("portalPassword").value = password;
+  const fakeEvent = { preventDefault: () => {} };
+  handlePortalLogin(fakeEvent);
+}
+
+function handleUserLogout() {
+  if (confirm("Are you sure you want to log out of the HIPG e-Tally System?")) {
+    sessionStorage.removeItem("hipg_etally_user");
+    lockSystemPortal();
+    alert("🚪 Logged out successfully. System is now locked.");
+  }
+}
+
+// Main Navigation
+function switchMainTab(tab) {
+  document.querySelectorAll(".nav-tab-btn").forEach(btn => btn.classList.remove("active"));
+  document.querySelectorAll(".tab-section").forEach(sec => sec.classList.add("hidden"));
+
+  if (tab === 'issue') {
+    document.getElementById("tabIssueBtn").classList.add("active");
+    document.getElementById("sectionIssue").classList.remove("hidden");
+  } else if (tab === 'inquire') {
+    document.getElementById("tabInquireBtn").classList.add("active");
+    document.getElementById("sectionInquire").classList.remove("hidden");
+  } else if (tab === 'generate') {
+    document.getElementById("tabGenerateBtn").classList.add("active");
+    document.getElementById("sectionGenerate").classList.remove("hidden");
+  } else if (tab === 'admin') {
+    document.getElementById("tabAdminBtn").classList.add("active");
+    document.getElementById("sectionAdmin").classList.remove("hidden");
+    loadAdminUsers();
+  }
+}
+
+function switchSubTab(subTab) {
+  document.querySelectorAll(".sub-tab-btn").forEach(btn => btn.classList.remove("active"));
+  document.getElementById("subViewOnboard").classList.add("hidden");
+  document.getElementById("subViewExport").classList.add("hidden");
+  document.getElementById("subViewUpdate").classList.add("hidden");
+  document.getElementById("subViewSecurity").classList.add("hidden");
+
+  if (subTab === 'onboard') {
+    document.getElementById("subTabOnboardBtn").classList.add("active");
+    document.getElementById("subViewOnboard").classList.remove("hidden");
+  } else if (subTab === 'export') {
+    document.getElementById("subTabExportBtn").classList.add("active");
+    document.getElementById("subViewExport").classList.remove("hidden");
+  } else if (subTab === 'update') {
+    document.getElementById("subTabUpdateBtn").classList.add("active");
+    document.getElementById("subViewUpdate").classList.remove("hidden");
+    refreshUpdateApprovals();
+  } else if (subTab === 'security') {
+    document.getElementById("subTabSecurityBtn").classList.add("active");
+    document.getElementById("subViewSecurity").classList.remove("hidden");
+  }
+}
+
+function switchAdminSubTab(adminSub) {
+  document.getElementById("adminViewUsers").classList.add("hidden");
+  document.getElementById("adminViewTally").classList.add("hidden");
+  document.getElementById("adminViewVessels").classList.add("hidden");
+  document.getElementById("adminViewAudit").classList.add("hidden");
+
+  document.querySelectorAll("#sectionAdmin .sub-tab-btn").forEach(b => b.classList.remove("active"));
+
+  if (adminSub === 'users') {
+    document.getElementById("adminTabUsersBtn").classList.add("active");
+    document.getElementById("adminViewUsers").classList.remove("hidden");
+    loadAdminUsers();
+  } else if (adminSub === 'tally') {
+    document.getElementById("adminTabTallyBtn").classList.add("active");
+    document.getElementById("adminViewTally").classList.remove("hidden");
+  } else if (adminSub === 'vessels') {
+    document.getElementById("adminTabVesselsBtn").classList.add("active");
+    document.getElementById("adminViewVessels").classList.remove("hidden");
+  } else if (adminSub === 'audit') {
+    document.getElementById("adminTabAuditBtn").classList.add("active");
+    document.getElementById("adminViewAudit").classList.remove("hidden");
+    loadAdminAuditLogs();
+  }
+}
+
+// Admin User Management
+async function loadAdminUsers() {
+  try {
+    const res = await fetch("/api/users");
+    const data = await res.json();
+    if (data.success) {
+      const tbody = document.getElementById("adminUsersTableBody");
+      tbody.innerHTML = "";
+      data.users.forEach(u => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><strong>${u.username}</strong></td>
+          <td>${u.name}</td>
+          <td><span class="status-pill verified">${u.role}</span></td>
+          <td><span class="status-pill ${u.status === 'ACTIVE' ? 'confirmed' : 'unverified'}">${u.status}</span></td>
+          <td>
+            <button class="btn btn-outline" style="padding:0.2rem 0.4rem; font-size:0.75rem;" onclick="deactivateUser(${u.id})">Deactivate</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+  } catch (err) {
+    console.error("Error loading admin users:", err);
+  }
+}
+
+async function handleAdminCreateUser(event) {
+  event.preventDefault();
+  const u = document.getElementById("adminUsername").value.trim();
+  const n = document.getElementById("adminName").value.trim();
+  const r = document.getElementById("adminRole").value;
+  const p = document.getElementById("adminPassword").value.trim();
+
+  try {
+    const res = await fetch("/api/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: u, name: n, role: r, password: p })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert(`✅ ${data.message}`);
+      document.getElementById("adminUserForm").reset();
+      loadAdminUsers();
+    }
+  } catch (err) {
+    console.error("Create user error:", err);
+  }
+}
+
+async function deactivateUser(id) {
+  if (!confirm("Are you sure you want to deactivate this user account?")) return;
+  try {
+    const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
+    const data = await res.json();
+    if (data.success) {
+      alert("User account deactivated.");
+      loadAdminUsers();
+    }
+  } catch (err) {
+    console.error("Deactivate error:", err);
+  }
+}
+
+// Admin Tally Override Privileges
+async function adminForceUnlockTally() {
+  const vin = document.getElementById("adminOverrideVinInput").value.trim();
+  if (!vin) return alert("Enter VIN.");
+  try {
+    const res = await fetch("/api/admin/override-tally", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ vin: vin, action: "UNLOCK", admin_id: currentUserRole })
+    });
+    const data = await res.json();
+    if (data.success) alert(`🔓 ${data.message}`);
+  } catch (err) {
+    console.error("Unlock error:", err);
+  }
+}
+
+async function adminPurgeTally() {
+  const vin = document.getElementById("adminOverrideVinInput").value.trim();
+  if (!vin) return alert("Enter VIN.");
+  if (!confirm(`CAUTION: Permanently delete Tally Sheet record for VIN ${vin}?`)) return;
+
+  try {
+    const res = await fetch("/api/admin/override-tally", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ vin: vin, action: "DELETE", admin_id: currentUserRole })
+    });
+    const data = await res.json();
+    if (data.success) alert(`🗑️ ${data.message}`);
+  } catch (err) {
+    console.error("Purge error:", err);
+  }
+}
+
+// Admin Vessel & Manifest Manager
+async function handleAdminAddVessel(event) {
+  event.preventDefault();
+  const name = document.getElementById("adminVesselName").value.trim();
+  const voyage = document.getElementById("adminVoyage").value.trim();
+  const berth = document.getElementById("adminBerth").value.trim();
+  const units = document.getElementById("adminUnits").value;
+
+  try {
+    const res = await fetch("/api/admin/add-vessel", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: name, voyage: voyage, berth_no: berth, total_units: units })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert(`🚢 ${data.message}`);
+      loadVessels();
+    }
+  } catch (err) {
+    console.error("Add vessel error:", err);
+  }
+}
+
+async function handleAdminAddChassis(event) {
+  event.preventDefault();
+  const vin = document.getElementById("adminChassisVin").value.trim();
+  const model = document.getElementById("adminChassisModel").value.trim();
+  const color = document.getElementById("adminChassisColor").value.trim();
+  const yard = document.getElementById("adminChassisYard").value.trim();
+
+  try {
+    const res = await fetch("/api/admin/add-chassis", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ vin: vin, model: model, color: color, yard: yard, vessel_id: "VSL001" })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert(`🚗 ${data.message}`);
+    }
+  } catch (err) {
+    console.error("Add chassis error:", err);
+  }
+}
+
+async function loadAdminAuditLogs() {
+  try {
+    const res = await fetch("/api/admin/audit-logs");
+    const data = await res.json();
+    if (data.success) {
+      const tbody = document.getElementById("adminAuditLogBody");
+      tbody.innerHTML = "";
+      data.audit_logs.forEach(l => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${l.id}</td>
+          <td>${l.timestamp}</td>
+          <td><strong>${l.vin}</strong></td>
+          <td>${l.work_point}</td>
+          <td>${l.user_id} (${l.user_role})</td>
+          <td>${l.details}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+  } catch (err) {
+    console.error("Error loading audit logs:", err);
+  }
+}
+
+// On-board Step Navigation
+function goToStep(step) {
+  document.getElementById("stepVessel").classList.add("hidden");
+  document.getElementById("stepChassis").classList.add("hidden");
+  document.getElementById("stepAccessories").classList.add("hidden");
+  document.getElementById("stepDamage").classList.add("hidden");
+  document.getElementById("stepReview").classList.add("hidden");
+
+  for (let i = 1; i <= 5; i++) {
+    const badge = document.getElementById(`stepBadge${i}`);
+    if (badge) badge.style.color = "var(--hipg-muted)";
+  }
+
+  if (step === 'vessel') {
+    document.getElementById("stepVessel").classList.remove("hidden");
+    document.getElementById("stepBadge1").style.color = "var(--hipg-blue)";
+  } else if (step === 'chassis') {
+    document.getElementById("stepChassis").classList.remove("hidden");
+    document.getElementById("stepBadge2").style.color = "var(--hipg-blue)";
+  } else if (step === 'accessories') {
+    document.getElementById("stepAccessories").classList.remove("hidden");
+    document.getElementById("stepBadge3").style.color = "var(--hipg-blue)";
+  } else if (step === 'damage') {
+    document.getElementById("stepDamage").classList.remove("hidden");
+    document.getElementById("stepBadge4").style.color = "var(--hipg-blue)";
+  } else if (step === 'review') {
+    document.getElementById("stepReview").classList.remove("hidden");
+    document.getElementById("stepBadge5").style.color = "var(--hipg-blue)";
+    renderOfficialTallyPreview("reviewTallySheetPreview", selectedChassis, activeTallyData);
+  }
+}
+
+async function loadVessels() {
+  try {
+    const res = await fetch("/api/vessels");
+    const data = await res.json();
+    if (data.success) {
+      currentVessels = data.vessels;
+      renderVesselsGrid();
+    }
+  } catch (err) {
+    console.error("Error loading vessels:", err);
+  }
+}
+
+function renderVesselsGrid() {
+  const container = document.getElementById("vesselsGrid");
+  container.innerHTML = "";
+
+  currentVessels.forEach(vessel => {
+    const card = document.createElement("div");
+    card.className = `vessel-card ${selectedVessel && selectedVessel.id === vessel.id ? 'selected' : ''}`;
+    card.onclick = () => selectVessel(vessel);
+
+    card.innerHTML = `
+      <div style="font-weight: 800; color: var(--hipg-navy); font-size: 1.05rem;">${vessel.name}</div>
+      <div style="font-size: 0.85rem; color: var(--hipg-muted);">Voyage: ${vessel.voyage} | ${vessel.berth_no}</div>
+      <div style="margin-top: 0.5rem; font-size: 0.8rem; display: flex; justify-content: space-between;">
+        <span>Units Manifested: <strong>${vessel.total_units}</strong></span>
+        <span class="status-pill verified">${vessel.status}</span>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function selectVessel(vessel) {
+  selectedVessel = vessel;
+  renderVesselsGrid();
+  document.getElementById("selectedVesselNameLabel").innerText = vessel.name;
+  document.getElementById("selectedVesselVoyageLabel").innerText = vessel.voyage;
+  loadChassisForVessel(vessel.id);
+  goToStep('chassis');
+}
+
+async function loadChassisForVessel(vesselId) {
+  try {
+    const res = await fetch(`/api/chassis?vessel_id=${vesselId}`);
+    const data = await res.json();
+    if (data.success) {
+      currentChassisList = data.chassis;
+      renderChassisGrid(currentChassisList);
+    }
+  } catch (err) {
+    console.error("Error loading chassis:", err);
+  }
+}
+
+function renderChassisGrid(list) {
+  const container = document.getElementById("chassisGrid");
+  container.innerHTML = "";
+
+  if (list.length === 0) {
+    container.innerHTML = `<div style="grid-column: 1/-1; padding: 1rem; color: var(--hipg-muted);">No chassis records found matching criteria.</div>`;
+    return;
+  }
+
+  list.forEach(c => {
+    const card = document.createElement("div");
+    card.className = `chassis-card ${selectedChassis && selectedChassis.vin === c.vin ? 'selected' : ''}`;
+    card.onclick = () => selectChassis(c);
+
+    let statusBadgeClass = "no-tally";
+    if (c.tally_status === 'Confirmed') statusBadgeClass = "confirmed";
+    if (c.tally_status === 'Verified') statusBadgeClass = "verified";
+
+    card.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <span style="font-weight: 800; font-size: 1.05rem; color: var(--hipg-blue);">${c.vin}</span>
+          <span style="font-size: 0.75rem; color: #64748B; margin-left: 0.4rem;">(Last 6: <strong>${c.last_6}</strong>)</span>
+        </div>
+        <span class="status-pill ${statusBadgeClass}">${c.tally_status}</span>
+      </div>
+      <div style="font-size: 0.85rem; margin-top: 0.4rem; color: var(--hipg-text);">
+        Model: <strong>${c.model}</strong> | ${c.brand_new_used} | ${c.color}
+      </div>
+      <div style="font-size: 0.78rem; color: var(--hipg-muted); margin-top: 0.3rem;">
+        Ref IID: ${c.iid || 'N/A'} | Location: ${c.yard} (${c.row_lane})
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function filterChassisList() {
+  const q = document.getElementById("vinSearchInput").value.trim().toLowerCase();
+  const filtered = currentChassisList.filter(c => c.vin.toLowerCase().includes(q) || c.last_6.includes(q));
+  renderChassisGrid(filtered);
+}
+
+async function selectChassis(chassis) {
+  selectedChassis = chassis;
+  renderChassisGrid(currentChassisList);
+
+  document.getElementById("activeVinLabel").innerText = chassis.vin;
+  document.getElementById("activeVinModelLabel").innerText = `(${chassis.model} - ${chassis.color})`;
+  document.getElementById("activeVinTallyStatus").innerText = chassis.tally_status;
+
+  try {
+    const res = await fetch(`/api/tally/${chassis.vin}`);
+    const data = await res.json();
+    if (data.success && data.tally) {
+      activeTallyData.accessories = data.tally.accessories_json || {};
+      activeTallyData.damages = data.tally.damages_json || [];
+      activeTallyData.photos = data.tally.photos_json || [];
+      activeTallyData.remarks = data.tally.remarks || "";
+      recordedDamages = [...activeTallyData.damages];
+      savedPhotos = [...activeTallyData.photos];
+    } else {
+      activeTallyData.accessories = {};
+      activeTallyData.damages = [];
+      activeTallyData.photos = [];
+      activeTallyData.remarks = "";
+      recordedDamages = [];
+      savedPhotos = [];
+    }
+  } catch (err) {
+    console.error("Error fetching chassis tally:", err);
+  }
+
+  renderAccessoriesChecklist();
+  renderRecordedDamages();
+  renderSavedPhotosGallery();
+  goToStep('accessories');
+}
+
+function toggleTallyMode(mode) {
+  currentTallyMode = mode;
+  document.getElementById("currentModeBadge").innerText = `${mode} MODE`;
+
+  if (mode === 'AI') {
+    document.getElementById("aiModeBanner").classList.remove("hidden");
+    runAiPhotoAutoFill();
+  } else {
+    document.getElementById("aiModeBanner").classList.add("hidden");
+  }
+}
+
+async function runAiPhotoAutoFill() {
+  try {
+    const res = await fetch("/api/tally/ai-scan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ vin: selectedChassis ? selectedChassis.vin : "" })
+    });
+    const data = await res.json();
+    if (data.success) {
+      activeTallyData.accessories = data.ai_items;
+      renderAccessoriesChecklist();
+      alert(`✨ AI Scan Completed (${data.confidence})! Checklist pre-validated. You may adjust items if needed.`);
+    }
+  } catch (err) {
+    console.error("Error in AI scan:", err);
+  }
+}
+
+function renderAccessoriesChecklist() {
+  const grid = document.getElementById("accessoriesChecklistGrid");
+  grid.innerHTML = "";
+
+  STANDARD_ACCESSORIES.forEach(item => {
+    const isChecked = !!activeTallyData.accessories[item];
+    const itemDiv = document.createElement("div");
+    itemDiv.className = "check-item";
+
+    itemDiv.innerHTML = `
+      <input type="checkbox" id="acc_${item}" ${isChecked ? 'checked' : ''} onchange="onAccessoryCheckChange('${item}', this.checked)">
+      <label for="acc_${item}" style="cursor: pointer; flex: 1;">${item}</label>
+    `;
+    grid.appendChild(itemDiv);
+  });
+}
+
+function onAccessoryCheckChange(itemKey, isChecked) {
+  activeTallyData.accessories[itemKey] = isChecked;
+}
+
+const DAMAGE_CODES = [
+  { code: 1, name: "1-Torn" }, { code: 2, name: "2-Bent" }, { code: 3, name: "3-Glass Cracked" },
+  { code: 4, name: "4-Rusty" }, { code: 5, name: "5-Creased" }, { code: 6, name: "6-Scratched" },
+  { code: 7, name: "7-Dented" }, { code: 8, name: "8-Smashed" }, { code: 9, name: "9-Missing" },
+  { code: 10, name: "10-Pitted" }, { code: 11, name: "11-Broken" }, { code: 12, name: "12-Stained" },
+  { code: 13, name: "13-Flat Tyre" }, { code: 14, name: "14-Jump Start" }, { code: 15, name: "15-No fuel" }
+];
+
+function renderDamageCodes() {
+  const container = document.getElementById("damageCodesContainer");
+  container.innerHTML = "";
+
+  DAMAGE_CODES.forEach(d => {
+    const badge = document.createElement("span");
+    badge.className = "damage-code-badge";
+    badge.innerText = d.name;
+    badge.onclick = () => {
+      document.getElementById("damageTypeSelect").value = `${d.code}-${d.name.split('-')[1]}`;
+    };
+    container.appendChild(badge);
+  });
+}
+
+function addRecordedDamage() {
+  const typeVal = document.getElementById("damageTypeSelect").value;
+  const locVal = document.getElementById("damageLocationInput").value.trim();
+
+  if (!locVal) {
+    alert("Please enter the damage location or component name.");
+    return;
+  }
+
+  const codeNum = parseInt(typeVal.split('-')[0]);
+  const typeName = typeVal.split('-')[1];
+
+  const entry = { type: typeName, location: locVal, code: codeNum };
+  recordedDamages.push(entry);
+  activeTallyData.damages = recordedDamages;
+  document.getElementById("damageLocationInput").value = "";
+  renderRecordedDamages();
+}
+
+function renderRecordedDamages() {
+  const list = document.getElementById("recordedDamagesList");
+  list.innerHTML = "";
+
+  if (recordedDamages.length === 0) {
+    list.innerHTML = `<li style="font-size: 0.8rem; color: var(--hipg-muted);">No damages recorded yet.</li>`;
+    return;
+  }
+
+  recordedDamages.forEach((d, idx) => {
+    const li = document.createElement("li");
+    li.style.cssText = "font-size: 0.85rem; padding: 0.3rem 0; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center;";
+    li.innerHTML = `
+      <span>🔴 <strong>Code ${d.code} (${d.type}):</strong> ${d.location}</span>
+      <button style="border:none; background:none; color:red; cursor:pointer;" onclick="removeDamage(${idx})">❌</button>
+    `;
+    list.appendChild(li);
+  });
+}
+
+function removeDamage(index) {
+  recordedDamages.splice(index, 1);
+  activeTallyData.damages = recordedDamages;
+  renderRecordedDamages();
+}
+
+function initCanvas() {
+  drawingCanvas = document.getElementById("damageCanvas");
+  if (!drawingCanvas) return;
+  canvasCtx = drawingCanvas.getContext("2d");
+  resetCanvasBackdrop();
+
+  drawingCanvas.addEventListener("mousedown", startDrawing);
+  drawingCanvas.addEventListener("mousemove", drawLine);
+  drawingCanvas.addEventListener("mouseup", stopDrawing);
+  drawingCanvas.addEventListener("mouseleave", stopDrawing);
+
+  drawingCanvas.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const mouseEvent = new MouseEvent("mousedown", { clientX: touch.clientX, clientY: touch.clientY });
+    drawingCanvas.dispatchEvent(mouseEvent);
+  }, { passive: false });
+
+  drawingCanvas.addEventListener("touchmove", (e) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const mouseEvent = new MouseEvent("mousemove", { clientX: touch.clientX, clientY: touch.clientY });
+    drawingCanvas.dispatchEvent(mouseEvent);
+  }, { passive: false });
+
+  drawingCanvas.addEventListener("touchend", (e) => {
+    e.preventDefault();
+    const mouseEvent = new MouseEvent("mouseup", {});
+    drawingCanvas.dispatchEvent(mouseEvent);
+  }, { passive: false });
+}
+
+function resetCanvasBackdrop() {
+  canvasCtx.fillStyle = "#1E293B";
+  canvasCtx.fillRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+  canvasCtx.fillStyle = "#94A3B8";
+  canvasCtx.font = "14px sans-serif";
+  canvasCtx.fillText("Upload / Select Photo to Annotate Damage", 80, 150);
+  canvasImageLoaded = false;
+}
+
+function loadPhotoToCanvas(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      canvasCtx.drawImage(img, 0, 0, drawingCanvas.width, drawingCanvas.height);
+      canvasImageLoaded = true;
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function startDrawing(e) {
+  isDrawing = true;
+  canvasCtx.beginPath();
+  const rect = drawingCanvas.getBoundingClientRect();
+  canvasCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+}
+
+function drawLine(e) {
+  if (!isDrawing) return;
+  const rect = drawingCanvas.getBoundingClientRect();
+  canvasCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+  canvasCtx.strokeStyle = "#EF4444";
+  canvasCtx.lineWidth = 4;
+  canvasCtx.stroke();
+}
+
+function stopDrawing() {
+  if (isDrawing) {
+    canvasCtx.closePath();
+    isDrawing = false;
+  }
+}
+
+function clearCanvas() {
+  resetCanvasBackdrop();
+}
+
+function saveAnnotatedPhoto() {
+  if (!canvasImageLoaded) {
+    alert("Please upload a photo first before saving annotation.");
+    return;
+  }
+
+  const dataUrl = drawingCanvas.toDataURL("image/png");
+  const captionText = prompt("Enter caption/label for this damage photo:", "Annotated Damage Area");
+
+  savedPhotos.push({ url: dataUrl, caption: captionText || "Damage Evidence", annotated: true });
+  activeTallyData.photos = savedPhotos;
+
+  renderSavedPhotosGallery();
+  alert("📸 Photo annotation saved successfully to Tally Sheet!");
+}
+
+function renderSavedPhotosGallery() {
+  const gallery = document.getElementById("savedPhotosGallery");
+  gallery.innerHTML = "";
+
+  if (savedPhotos.length === 0) {
+    gallery.innerHTML = `<div style="font-size: 0.8rem; color: var(--hipg-muted); grid-column: 1/-1;">No photos attached yet.</div>`;
+    return;
+  }
+
+  savedPhotos.forEach((p, idx) => {
+    const card = document.createElement("div");
+    card.className = "photo-card";
+    card.innerHTML = `
+      <img src="${p.url}" alt="Damage Photo">
+      <div class="photo-caption">${p.caption}</div>
+      <button style="width:100%; border:none; background:#DC2626; color:white; font-size:0.7rem; padding:0.2rem; cursor:pointer;" onclick="removePhoto(${idx})">Delete</button>
+    `;
+    gallery.appendChild(card);
+  });
+}
+
+function removePhoto(idx) {
+  savedPhotos.splice(idx, 1);
+  activeTallyData.photos = savedPhotos;
+  renderSavedPhotosGallery();
+}
+
+async function confirmFinalTallySheet() {
+  if (!selectedChassis) {
+    alert("No chassis selected.");
+    return;
+  }
+
+  activeTallyData.remarks = document.getElementById("tallyRemarksInput").value;
+
+  const payload = {
+    vin: selectedChassis.vin,
+    doc_ref: "20586",
+    vessel_id: selectedChassis.vessel_id,
+    tally_type: "ONBOARD",
+    status: "Confirmed",
+    accessories: activeTallyData.accessories,
+    damages: activeTallyData.damages,
+    photos: activeTallyData.photos,
+    remarks: activeTallyData.remarks,
+    user_id: currentUserRole
+  };
+
+  try {
+    const res = await fetch("/api/tally", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert(`✅ Tally Sheet CONFIRMED & LOCKED for VIN ${selectedChassis.vin}! Record has been locked for audit.`);
+      selectedChassis.tally_status = "Confirmed";
+      loadChassisForVessel(selectedChassis.vessel_id);
+      switchMainTab('inquire');
+      runInquireSearch(selectedChassis.last_6);
+    }
+  } catch (err) {
+    console.error("Error confirming tally:", err);
+  }
+}
+
+function renderOfficialTallyPreview(targetContainerId, chassisObj, tallyData) {
+  const container = document.getElementById(targetContainerId);
+  if (!container) return;
+
+  const c = chassisObj || { vin: "RV5-1268273", last_6: "268273", model: "VEZEL", brand_new_used: "USED", iid: "ROV#4953-01022" };
+  const acc = (tallyData && tallyData.accessories) ? tallyData.accessories : {};
+  const dmgs = (tallyData && tallyData.damages) ? tallyData.damages : [];
+  const photos = (tallyData && tallyData.photos) ? tallyData.photos : [];
+  const remarks = (tallyData && tallyData.remarks) ? tallyData.remarks : "None";
+
+  const getCheck = (key) => (acc[key] ? "YES" : "NO");
+
+  let damageRowsHtml = "";
+  if (dmgs.length === 0) {
+    damageRowsHtml = `<tr><td colspan="4" style="text-align:center; color: var(--hipg-muted);">No damage identified. Vehicle discharged in sound condition.</td></tr>`;
+  } else {
+    dmgs.forEach(d => {
+      damageRowsHtml += `
+        <tr>
+          <td style="font-weight:700; color:var(--hipg-danger);">${d.code} - ${d.type}</td>
+          <td colspan="3">${d.location}</td>
+        </tr>
+      `;
+    });
+  }
+
+  let photosHtml = "";
+  if (photos.length > 0) {
+    photosHtml = `
+      <div style="margin-top: 1rem;">
+        <div style="font-weight:700; font-size:0.85rem; color:var(--hipg-navy); margin-bottom:0.4rem;">ATTACHED DAMAGE PHOTOGRAPHS & ANNOTATIONS:</div>
+        <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+          ${photos.map(p => `
+            <div style="border:1px solid #CBD5E1; border-radius:6px; overflow:hidden; width:180px;">
+              <img src="${p.url}" style="width:100%; height:120px; object-fit:cover; display:block;">
+              <div style="font-size:0.7rem; padding:0.3rem; background:#F1F5F9; text-align:center;">${p.caption}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = `
+    <div class="tally-header">
+      <div style="display:flex; align-items:center; gap:0.75rem;">
+        <img src="${HIPG_LOGO_BASE64}" style="height:36px; object-fit:contain; background:white; padding:2px 4px; border-radius:4px;">
+        <div>
+          <h2 style="color: var(--hipg-navy); font-weight:900; font-size:1.2rem;">HAMBANTOTA INTERNATIONAL PORT GROUP PVT LTD</h2>
+          <h3 style="font-size:1rem; color: var(--hipg-blue);">VEHICLE TALLY SHEET LOCAL / TRANSSHIPMENT</h3>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <span style="font-size:0.8rem; color:var(--hipg-muted);">DOC Ref:</span>
+        <span style="font-size:1.2rem; font-weight:900; color:var(--hipg-danger);">20586</span>
+      </div>
+    </div>
+
+    <!-- Metadata Matrix -->
+    <div class="tally-meta-grid">
+      <div class="meta-box"><span class="meta-label">Chassis / VIN No:</span><span class="meta-value">${c.vin}</span></div>
+      <div class="meta-box"><span class="meta-label">Used (Y/N):</span><span class="meta-value">${c.brand_new_used || 'USED'}</span></div>
+      <div class="meta-box"><span class="meta-label">IID:</span><span class="meta-value">${c.iid || 'ROV#4953-01022'}</span></div>
+      <div class="meta-box"><span class="meta-label">Model:</span><span class="meta-value">${c.model}</span></div>
+      <div class="meta-box"><span class="meta-label">Vessel Name:</span><span class="meta-value">${c.vessel_name || 'VIKING DRIVE'}</span></div>
+      <div class="meta-box"><span class="meta-label">Voyage:</span><span class="meta-value">41</span></div>
+      <div class="meta-box"><span class="meta-label">Location:</span><span class="meta-value">${c.yard || 'Yard A'} (${c.row_lane || 'Block 2-Row 4'})</span></div>
+      <div class="meta-box"><span class="meta-label">Tally Status:</span><span class="meta-value" style="color:var(--hipg-success);">${c.tally_status || 'Confirmed'}</span></div>
+    </div>
+
+    <!-- Vehicle Item / Accessories Checklist -->
+    <div style="font-weight:700; font-size:0.85rem; color:var(--hipg-navy); margin-bottom:0.4rem;">VEHICLE ITEM / ACCESSORIES TALLY CHECKLIST</div>
+    <div class="table-responsive">
+      <table class="tally-checklist-table">
+        <thead>
+          <tr>
+            <th>ITEM DESCRIPTION</th>
+            <th>STATUS</th>
+            <th>ITEM DESCRIPTION</th>
+            <th>STATUS</th>
+            <th>ITEM DESCRIPTION</th>
+            <th>STATUS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>MGR - MONO GRAM</td><td><strong>${getCheck("MONO GRAM")}</strong></td>
+            <td>CMR - CAMERA REAR</td><td><strong>${getCheck("CAMERA - REAR")}</strong></td>
+            <td>GNB - GEAR NOB</td><td><strong>${getCheck("GEAR NOB")}</strong></td>
+          </tr>
+          <tr>
+            <td>WIP - WIPERS</td><td><strong>${getCheck("WIPERS")}</strong></td>
+            <td>SPT - SPARE TYRE</td><td><strong>${getCheck("SPARE TYRE")}</strong></td>
+            <td>CAD - CAR AUDIO</td><td><strong>${getCheck("CAR AUDIO")}</strong></td>
+          </tr>
+          <tr>
+            <td>TOC - TOW CAP</td><td><strong>${getCheck("TOW CAP")}</strong></td>
+            <td>WBR - WHEEL BRUSH</td><td><strong>${getCheck("WHEEL BRUSH")}</strong></td>
+            <td>TSF - TV SCREEN FRONT</td><td><strong>${getCheck("TV SCREEN - FRONT")}</strong></td>
+          </tr>
+          <tr>
+            <td>SMR - SIDE MIRROR R</td><td><strong>${getCheck("SIDE MIRROR - RIGHT")}</strong></td>
+            <td>JAC - JACK</td><td><strong>${getCheck("JACK")}</strong></td>
+            <td>TSR - TV SCREEN REAR</td><td><strong>${getCheck("TV SCREEN - REAR")}</strong></td>
+          </tr>
+          <tr>
+            <td>SML - SIDE MIRROR L</td><td><strong>${getCheck("SIDE MIRROR - LEFT")}</strong></td>
+            <td>TKT - TOOL KIT</td><td><strong>${getCheck("TOOL KIT")}</strong></td>
+            <td>CPT - CARPETS</td><td><strong>${getCheck("CARPETS")}</strong></td>
+          </tr>
+          <tr>
+            <td>HCP - HUB CAPS</td><td><strong>${getCheck("HUB CAPS")}</strong></td>
+            <td>APM - AIR PUMP</td><td><strong>${getCheck("AIR PUMP")}</strong></td>
+            <td>DRC - DR CAMERA</td><td><strong>${getCheck("DR CAMERA")}</strong></td>
+          </tr>
+          <tr>
+            <td>WCP - WHEEL CUP</td><td><strong>${getCheck("WHEEL CUP")}</strong></td>
+            <td>GBT - GUM BOTTLE</td><td><strong>${getCheck("GUM BOTTLE")}</strong></td>
+            <td>PSP - PERSONNEL PKG</td><td><strong>${getCheck("PERSONNEL PKG")}</strong></td>
+          </tr>
+          <tr>
+            <td>ANT - ANTENNA</td><td><strong>${getCheck("ANTENNA")}</strong></td>
+            <td>ALLOY WHEEL</td><td><strong>${getCheck("ALLOY")}</strong></td>
+            <td>REMOTE KEY</td><td><strong>01</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Damage Summary -->
+    <div style="font-weight:700; font-size:0.85rem; color:var(--hipg-navy); margin-bottom:0.4rem;">DAMAGE RECORD & CONDITION CODE SUMMARY</div>
+    <div class="table-responsive">
+      <table class="tally-checklist-table">
+        <thead>
+          <tr>
+            <th style="width: 25%;">DAMAGE TYPE</th>
+            <th colspan="3">LOCATION / NOTES</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${damageRowsHtml}
+        </tbody>
+      </table>
+    </div>
+
+    <div style="background:#F8FAFC; border:1px solid #CBD5E1; padding:0.5rem 0.75rem; border-radius:6px; font-size:0.85rem;">
+      <strong>Remarks:</strong> ${remarks}
+    </div>
+
+    ${photosHtml}
+
+    <!-- Work Point Audit Trail Table -->
+    <div style="font-weight:700; font-size:0.85rem; color:var(--hipg-navy); margin-top:1rem; margin-bottom:0.4rem;">WORK POINT AUDIT TRAIL RECORD</div>
+    <div class="table-responsive">
+      <table class="audit-table" id="previewAuditTable">
+        <thead>
+          <tr>
+            <th>Work Point</th>
+            <th>Surveyor ID</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Driver ID</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Security ID</th>
+            <th>Date</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Onboard</td><td>298</td><td>16/08/2026</td><td>14:50</td><td>60664</td><td>16/08/2026</td><td>15:00</td><td>-</td><td>-</td><td>-</td>
+          </tr>
+          <tr>
+            <td>Yard Shift</td><td>-</td><td>-</td><td>-</td><td>TR25</td><td>17/08/2026</td><td>11:00</td><td>5958</td><td>16/08/2026</td><td>16:00</td>
+          </tr>
+          <tr>
+            <td>Update</td><td>352</td><td>17/08/2026</td><td>10:50</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>
+          </tr>
+          <tr>
+            <td>Delivery Gate</td><td>-</td><td>-</td><td>-</td><td>TR14</td><td>25/08/2026</td><td>23:20</td><td>5920</td><td>25/08/2026</td><td>23:19</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+async function runInquireSearch(preQuery) {
+  const query = preQuery || document.getElementById("inquireInput").value.trim();
+  if (!query) {
+    alert("Please enter last 6 digits of VIN or full VIN.");
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/chassis/search?query=${encodeURIComponent(query)}`);
+    const data = await res.json();
+    if (data.success && data.chassis.length > 0) {
+      const chassis = data.chassis[0];
+      const tallyRes = await fetch(`/api/tally/${chassis.vin}`);
+      const tallyData = await tallyRes.json();
+
+      const container = document.getElementById("inquireResultsContainer");
+      container.innerHTML = `
+        <div style="margin-bottom: 1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+          <h3 style="color:var(--hipg-navy);">Digital e-Tally Record: ${chassis.vin}</h3>
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn btn-outline" onclick="printCurrentTallySheet()">🖨️ Print Tally Sheet</button>
+            <button class="btn btn-success" onclick="downloadSinglePdf('${chassis.vin}')">📥 Download PDF Tally Sheet</button>
+          </div>
+        </div>
+        <div id="inquireTallySheetCard" class="official-tally-sheet"></div>
+      `;
+      renderOfficialTallyPreview("inquireTallySheetCard", chassis, tallyData.tally);
+    } else {
+      document.getElementById("inquireResultsContainer").innerHTML = `
+        <div style="padding:1.5rem; text-align:center; color:var(--hipg-danger); background:#FEE2E2; border-radius:8px;">
+          No matching vehicle found in system for query: "<strong>${query}</strong>"
+        </div>
+      `;
+    }
+  } catch (err) {
+    console.error("Inquire search error:", err);
+  }
+}
+
+function printCurrentTallySheet() {
+  window.print();
+}
+
+async function searchSecurityChassis() {
+  const q = document.getElementById("securityVinSearchInput").value.trim();
+  if (!q) {
+    alert("Enter last 6 digits of VIN.");
+    return;
+  }
+
+  try {
+    const res = await fetch(`/api/chassis/search?query=${encodeURIComponent(q)}`);
+    const data = await res.json();
+    if (data.success && data.chassis.length > 0) {
+      const c = data.chassis[0];
+      const panel = document.getElementById("securitySearchResultPanel");
+      panel.classList.remove("hidden");
+
+      panel.innerHTML = `
+        <div style="background:#F8FAFC; border:1px solid #CBD5E1; padding:1rem; border-radius:8px; margin-top:1rem;">
+          <h4 style="color:var(--hipg-navy);">Vehicle Discharged Condition Verification</h4>
+          <p><strong>VIN:</strong> ${c.vin} | <strong>Model:</strong> ${c.model} | <strong>Yard:</strong> ${c.yard}</p>
+          
+          <div style="margin:1rem 0; background:#FFF; padding:0.75rem; border:1px solid #CBD5E1; border-radius:6px;">
+            <label style="font-weight:700; color:var(--hipg-navy);">Select Discrepancy Comments (If Any):</label>
+            <div style="display:flex; gap:1rem; margin-top:0.5rem; flex-wrap:wrap;">
+              <label><input type="checkbox" id="sec_err"> Tally Error</label>
+              <label><input type="checkbox" id="sec_miss"> Item Missing</label>
+              <label><input type="checkbox" id="sec_lock"> Door Lock Issue</label>
+            </div>
+            <div style="margin-top:0.75rem;">
+              <label style="font-weight:700; font-size:0.85rem;">Security Officer Remarks:</label>
+              <textarea id="secRemarkInput" class="form-control" rows="2" placeholder="Input condition check remarks..."></textarea>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+            <button class="btn btn-success" onclick="submitSecurityCheck('${c.vin}', 'Verified')">✅ Confirm & Mark "VERIFIED"</button>
+            <button class="btn btn-warning" onclick="submitSecurityCheck('${c.vin}', 'Unverified')">⚠️ Mark "UNVERIFIED" (Discrepancy Logged)</button>
+          </div>
+        </div>
+      `;
+    }
+  } catch (err) {
+    console.error("Security search error:", err);
+  }
+}
+
+async function submitSecurityCheck(vin, status) {
+  const discrepancies = [];
+  if (document.getElementById("sec_err") && document.getElementById("sec_err").checked) discrepancies.push("Tally error");
+  if (document.getElementById("sec_miss") && document.getElementById("sec_miss").checked) discrepancies.push("Item missing");
+  if (document.getElementById("sec_lock") && document.getElementById("sec_lock").checked) discrepancies.push("Door lock");
+
+  const remarks = document.getElementById("secRemarkInput") ? document.getElementById("secRemarkInput").value : "";
+
+  try {
+    const res = await fetch("/api/security-check", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ vin: vin, status: status, discrepancies: discrepancies, remarks: remarks, user_id: currentUserRole })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert(`🛡️ Security Check submitted as [${status}] for VIN ${vin}!`);
+      document.getElementById("securitySearchResultPanel").classList.add("hidden");
+    }
+  } catch (err) {
+    console.error("Submit security check error:", err);
+  }
+}
+
+async function refreshUpdateApprovals() {
+  const container = document.getElementById("approvalRoleSection");
+  if (!container) return;
+
+  try {
+    const res = await fetch("/api/update-approval/list");
+    const data = await res.json();
+    if (data.success) {
+      const list = data.approvals;
+
+      if (currentUserRole && (currentUserRole.includes("Supervisor") || currentUserRole.includes("Admin"))) {
+        let html = `
+          <div style="background:#FFFBEB; border:1px solid #FCD34D; padding:1rem; border-radius:8px;">
+            <h4 style="color:#92400E;">Pending Tally Update Requests for Approval</h4>
+        `;
+        if (list.length === 0) {
+          html += `<p style="font-size:0.85rem; color:var(--hipg-muted); margin-top:0.4rem;">No pending update requests.</p>`;
+        } else {
+          list.forEach(a => {
+            html += `
+              <div style="display:flex; justify-content:space-between; align-items:center; background:#FFF; border:1px solid #E2E8F0; padding:0.6rem; border-radius:6px; margin-top:0.5rem; flex-wrap:wrap; gap:0.5rem;">
+                <div>
+                  <strong>VIN: ${a.vin}</strong> (${a.model}) | Requested by: ${a.requested_by}<br>
+                  <small style="color:var(--hipg-muted);">Reason: ${a.reason}</small>
+                </div>
+                <div style="display:flex; gap:0.5rem;">
+                  <button class="btn btn-success" style="padding:0.3rem 0.6rem; font-size:0.8rem;" onclick="respondApproval(${a.id}, 'APPROVE')">Approve Update</button>
+                  <button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.8rem;" onclick="respondApproval(${a.id}, 'REJECT')">Reject</button>
+                </div>
+              </div>
+            `;
+          });
+        }
+        html += `</div>`;
+        container.innerHTML = html;
+      } else {
+        container.innerHTML = `
+          <div style="background:#EFF6FF; border:1px solid #BFDBFE; padding:1rem; border-radius:8px;">
+            <h4 style="color:var(--hipg-blue);">Request Tally Update Authorization</h4>
+            <p style="font-size:0.85rem; color:var(--hipg-muted);">Select a locked chassis VIN to submit an update request to your supervisor.</p>
+            <div style="display:flex; gap:0.5rem; margin-top:0.75rem; flex-wrap:wrap;">
+              <input type="text" id="requestVinInput" class="form-control" style="flex:1; min-width:200px;" placeholder="Enter VIN (e.g. RV5-1268273)...">
+              <button class="btn btn-primary" onclick="requestUpdateApproval()">Submit Request</button>
+            </div>
+          </div>
+        `;
+      }
+    }
+  } catch (err) {
+    console.error("Error refreshing approvals:", err);
+  }
+}
+
+async function requestUpdateApproval() {
+  const vin = document.getElementById("requestVinInput").value.trim();
+  if (!vin) return alert("Enter VIN.");
+  const reason = prompt("Enter reason for requesting tally update:", "Accessory check adjustment after yard movement");
+
+  try {
+    const res = await fetch("/api/update-approval/request", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ vin: vin, reason: reason, user_id: currentUserRole })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert("✅ Request submitted to supervisor!");
+      refreshUpdateApprovals();
+    }
+  } catch (err) {
+    console.error("Error requesting approval:", err);
+  }
+}
+
+async function respondApproval(approvalId, action) {
+  try {
+    const res = await fetch("/api/update-approval/respond", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ approval_id: approvalId, action: action, user_id: currentUserRole })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert(`Request ${action === 'APPROVE' ? 'Approved' : 'Rejected'}!`);
+      refreshUpdateApprovals();
+    }
+  } catch (err) {
+    console.error("Error responding to approval:", err);
+  }
+}
+
+let bulkMatchedChassis = [];
+
+async function processBulkInquire() {
+  const text = document.getElementById("bulkVinInput").value;
+  const lines = text.split(/[\n,]+/).map(s => s.trim()).filter(s => s.length > 0);
+
+  if (lines.length === 0) return alert("Please enter or paste at least one VIN or last 6 digits.");
+
+  try {
+    const res = await fetch("/api/bulk-inquire", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ vins: lines })
+    });
+    const data = await res.json();
+    if (data.success) {
+      bulkMatchedChassis = data.matched;
+      document.getElementById("bulkResultsContainer").classList.remove("hidden");
+      document.getElementById("matchedVinCountBadge").innerText = `${data.matched.length} Matched`;
+      document.getElementById("unmatchedVinCountBadge").innerText = `${data.unmatched.length} Unmatched`;
+
+      const tbody = document.getElementById("bulkTableBody");
+      tbody.innerHTML = "";
+
+      if (data.matched.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--hipg-muted);">No records found matching input VINs.</td></tr>`;
+        return;
+      }
+
+      data.matched.forEach((c, idx) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td style="text-align:center;"><input type="checkbox" class="bulk-item-check" data-vin="${c.vin}" checked></td>
+          <td><strong>${c.vin}</strong> <small>(${c.last_6})</small></td>
+          <td>${c.model}</td>
+          <td>${c.vessel_name || 'VIKING DRIVE'} (${c.voyage || '41'})</td>
+          <td><span class="status-pill confirmed">${c.tally_status || 'Confirmed'}</span></td>
+          <td><strong style="color:var(--hipg-danger);">${c.doc_ref || '20586'}</strong></td>
+          <td><button class="btn btn-outline" style="padding:0.2rem 0.5rem; font-size:0.75rem;" onclick="downloadSinglePdf('${c.vin}')">PDF</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+  } catch (err) {
+    console.error("Bulk inquire error:", err);
+  }
+}
+
+function toggleSelectAllBulk(masterCheck) {
+  document.querySelectorAll(".bulk-item-check").forEach(chk => chk.checked = masterCheck.checked);
+}
+
+async function downloadSinglePdf(vin) {
+  try {
+    const res = await fetch(`/api/chassis/search?query=${vin}`);
+    const data = await res.json();
+    if (!data.success || data.chassis.length === 0) return alert("VIN record not found.");
+    const chassis = data.chassis[0];
+    const tallyRes = await fetch(`/api/tally/${chassis.vin}`);
+    const tallyData = await tallyRes.json();
+    createCrispPdf(chassis, tallyData.tally, tallyData.audit);
+  } catch (err) {
+    console.error("PDF generation failed:", err);
+    alert("Error generating PDF.");
+  }
+}
+
+function createCrispPdf(c, tally, audit) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF("p", "mm", "a4");
+
+  const acc = (tally && tally.accessories_json) ? tally.accessories_json : {};
+  const dmgs = (tally && tally.damages_json) ? tally.damages_json : [];
+  const photos = (tally && tally.photos_json) ? tally.photos_json : [];
+  const remarks = (tally && tally.remarks) ? tally.remarks : "None";
+
+  const getCheck = (key) => (acc[key] ? "YES" : "NO");
+
+  const navy = [15, 45, 89];
+  const red = [220, 38, 38];
+
+  doc.setDrawColor(...navy);
+  doc.setLineWidth(0.8);
+  doc.rect(8, 8, 194, 280);
+
+  doc.setFillColor(...navy);
+  doc.rect(8, 8, 194, 16, "F");
+  try {
+    doc.addImage(HIPG_LOGO_BASE64, "PNG", 12, 9.5, 32, 11);
+  } catch(e) {}
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.text("HAMBANTOTA INTERNATIONAL PORT GROUP PVT LTD", 47, 18.5);
+
+  doc.setTextColor(15, 45, 89);
+  doc.setFontSize(11);
+  doc.text("VEHICLE TALLY SHEET LOCAL / TRANSSHIPMENT", 12, 28);
+
+  doc.setTextColor(...red);
+  doc.setFontSize(12);
+  doc.text("DOC Ref: 20586", 155, 28);
+
+  let y = 33;
+  doc.setFillColor(241, 245, 249);
+  doc.rect(10, y, 190, 20, "F");
+  doc.setDrawColor(203, 213, 225);
+  doc.rect(10, y, 190, 20, "S");
+
+  doc.setFontSize(8);
+  doc.setTextColor(100, 116, 139);
+  doc.text("Chassis / VIN No:", 12, y + 5);
+  doc.text("Used (Y/N):", 62, y + 5);
+  doc.text("IID:", 102, y + 5);
+  doc.text("Model:", 145, y + 5);
+
+  doc.setFontSize(9.5);
+  doc.setTextColor(15, 45, 89);
+  doc.text(c.vin, 12, y + 10);
+  doc.text(c.brand_new_used || "USED", 62, y + 10);
+  doc.text(c.iid || "ROV#4953-01022", 102, y + 10);
+  doc.text(c.model, 145, y + 10);
+
+  doc.setFontSize(8);
+  doc.setTextColor(100, 116, 139);
+  doc.text("Vessel Name:", 12, y + 15);
+  doc.text("Voyage:", 62, y + 15);
+  doc.text("Location:", 102, y + 15);
+  doc.text("Tally Status:", 145, y + 15);
+
+  doc.setFontSize(9.5);
+  doc.setTextColor(15, 45, 89);
+  doc.text(c.vessel_name || "VIKING DRIVE", 12, y + 19);
+  doc.text(c.voyage || "41", 62, y + 19);
+  doc.text(`${c.yard || 'Yard A'} (${c.row_lane || 'Block 2-Row 4'})`, 102, y + 19);
+  doc.setTextColor(22, 163, 74);
+  doc.text(c.tally_status || "Confirmed", 145, y + 19);
+
+  y = 57;
+  doc.setFillColor(...navy);
+  doc.rect(10, y, 190, 6, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(9);
+  doc.text("VEHICLE ITEM / ACCESSORIES TALLY CHECKLIST", 12, y + 4.5);
+
+  y = 63;
+  const itemsList = [
+    ["MGR - MONO GRAM", getCheck("MONO GRAM"), "CMR - CAMERA REAR", getCheck("CAMERA - REAR"), "GNB - GEAR NOB", getCheck("GEAR NOB")],
+    ["WIP - WIPERS", getCheck("WIPERS"), "SPT - SPARE TYRE", getCheck("SPARE TYRE"), "CAD - CAR AUDIO", getCheck("CAR AUDIO")],
+    ["TOC - TOW CAP", getCheck("TOW CAP"), "WBR - WHEEL BRUSH", getCheck("WHEEL BRUSH"), "TSF - TV SCREEN FRONT", getCheck("TV SCREEN - FRONT")],
+    ["SMR - SIDE MIRROR R", getCheck("SIDE MIRROR - RIGHT"), "JAC - JACK", getCheck("JACK"), "TSR - TV SCREEN REAR", getCheck("TV SCREEN - REAR")],
+    ["SML - SIDE MIRROR L", getCheck("SIDE MIRROR - LEFT"), "TKT - TOOL KIT", getCheck("TOOL KIT"), "CPT - CARPETS", getCheck("CARPETS")],
+    ["HCP - HUB CAPS", getCheck("HUB CAPS"), "APM - AIR PUMP", getCheck("AIR PUMP"), "DRC - DR CAMERA", getCheck("DR CAMERA")],
+    ["WCP - WHEEL CUP", getCheck("WHEEL CUP"), "GBT - GUM BOTTLE", getCheck("GUM BOTTLE"), "PSP - PERSONNEL PKG", getCheck("PERSONNEL PKG")],
+    ["ANT - ANTENNA", getCheck("ANTENNA"), "ALLOY WHEEL", getCheck("ALLOY"), "REMOTE KEY", "01"]
+  ];
+
+  doc.setFontSize(7.5);
+  doc.setDrawColor(203, 213, 225);
+
+  itemsList.forEach((row, idx) => {
+    const rowY = y + (idx * 6);
+    doc.rect(10, rowY, 190, 6, "S");
+    doc.setTextColor(30, 41, 59);
+    doc.text(row[0], 12, rowY + 4);
+    doc.setFont("helvetica", "bold");
+    doc.text(row[1], 55, rowY + 4);
+    doc.setFont("helvetica", "normal");
+
+    doc.text(row[2], 75, rowY + 4);
+    doc.setFont("helvetica", "bold");
+    doc.text(row[3], 120, rowY + 4);
+    doc.setFont("helvetica", "normal");
+
+    doc.text(row[4], 138, rowY + 4);
+    doc.setFont("helvetica", "bold");
+    doc.text(row[5], 185, rowY + 4);
+    doc.setFont("helvetica", "normal");
+  });
+
+  y = 114;
+  doc.setFillColor(...navy);
+  doc.rect(10, y, 190, 6, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.text("DAMAGE RECORD & CONDITION CODE SUMMARY", 12, y + 4.5);
+
+  y = 120;
+  doc.setFillColor(241, 245, 249);
+  doc.rect(10, y, 190, 5, "F");
+  doc.setTextColor(15, 45, 89);
+  doc.setFontSize(8);
+  doc.text("CODE & DAMAGE TYPE", 12, y + 3.5);
+  doc.text("LOCATION / NOTES", 75, y + 3.5);
+
+  y = 125;
+  if (dmgs.length === 0) {
+    doc.rect(10, y, 190, 6, "S");
+    doc.setTextColor(100, 116, 139);
+    doc.setFont("helvetica", "normal");
+    doc.text("No damage identified. Vehicle discharged in sound condition.", 12, y + 4);
+    y += 6;
+  } else {
+    dmgs.forEach(d => {
+      doc.rect(10, y, 190, 6, "S");
+      doc.setTextColor(...red);
+      doc.setFont("helvetica", "bold");
+      doc.text(`${d.code} - ${d.type}`, 12, y + 4);
+      doc.setTextColor(30, 41, 59);
+      doc.setFont("helvetica", "normal");
+      doc.text(d.location, 75, y + 4);
+      y += 6;
+    });
+  }
+
+  y += 2;
+  doc.setFillColor(248, 250, 252);
+  doc.rect(10, y, 190, 10, "F");
+  doc.rect(10, y, 190, 10, "S");
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(15, 45, 89);
+  doc.text("Remarks / Notes:", 12, y + 4);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(30, 41, 59);
+  doc.text(remarks, 40, y + 4);
+
+  y += 13;
+  if (photos && photos.length > 0) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(15, 45, 89);
+    doc.text("DAMAGE EVIDENCE PHOTOGRAPHS:", 12, y);
+    y += 3;
+
+    let photoX = 12;
+    photos.forEach(p => {
+      try {
+        doc.addImage(p.url, "PNG", photoX, y, 50, 35);
+        doc.rect(photoX, y, 50, 35, "S");
+        doc.setFontSize(6.5);
+        doc.setFont("helvetica", "normal");
+        doc.text(p.caption || "Damage", photoX + 2, y + 38);
+        photoX += 58;
+      } catch (e) {}
+    });
+    y += 42;
+  }
+
+  doc.setFillColor(...navy);
+  doc.rect(10, y, 190, 6, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.text("WORK POINT AUDIT TRAIL RECORD", 12, y + 4.5);
+
+  y += 6;
+  doc.setFillColor(226, 232, 240);
+  doc.rect(10, y, 190, 5, "F");
+  doc.setTextColor(15, 45, 89);
+  doc.setFontSize(7);
+  doc.text("Work Point", 12, y + 3.5);
+  doc.text("Surveyor", 40, y + 3.5);
+  doc.text("Date", 60, y + 3.5);
+  doc.text("Time", 80, y + 3.5);
+  doc.text("Driver ID", 100, y + 3.5);
+  doc.text("Date", 125, y + 3.5);
+  doc.text("Time", 145, y + 3.5);
+  doc.text("Security", 165, y + 3.5);
+
+  y += 5;
+  const auditRows = [
+    ["Onboard", "298", "16/08/2026", "14:50", "60664", "16/08/2026", "15:00", "-", "-"],
+    ["Yard Shift", "-", "-", "-", "TR25", "17/08/2026", "11:00", "5958", "16/08/2026 16:00"],
+    ["Update", "352", "17/08/2026", "10:50", "-", "-", "-", "-", "-"],
+    ["Delivery Gate", "-", "-", "-", "TR14", "25/08/2026", "23:20", "5920", "25/08/2026 23:19"]
+  ];
+
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(30, 41, 59);
+  auditRows.forEach(row => {
+    doc.rect(10, y, 190, 5, "S");
+    doc.text(row[0], 12, y + 3.5);
+    doc.text(row[1], 40, y + 3.5);
+    doc.text(row[2], 60, y + 3.5);
+    doc.text(row[3], 80, y + 3.5);
+    doc.text(row[4], 100, y + 3.5);
+    doc.text(row[5], 125, y + 3.5);
+    doc.text(row[6], 145, y + 3.5);
+    doc.text(row[7], 165, y + 3.5);
+    y += 5;
+  });
+
+  doc.setFontSize(7);
+  doc.setTextColor(100, 116, 139);
+  doc.text(`Official HIPG Digital Record | System Generated: ${new Date().toLocaleString()} | Verified & Locked`, 12, 284);
+
+  doc.save(`HIPG_Tally_Sheet_${c.vin}.pdf`);
+}
+
+async function generateSelectedPdfs() {
+  const selectedChecks = Array.from(document.querySelectorAll(".bulk-item-check:checked"));
+  if (selectedChecks.length === 0) return alert("Please select at least one VIN record.");
+  for (let chk of selectedChecks) {
+    const vin = chk.dataset.vin;
+    await downloadSinglePdf(vin);
+  }
+}

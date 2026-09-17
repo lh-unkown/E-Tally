@@ -1,0 +1,560 @@
+/* Hambantota International Port Group (HIPG) e-Tally System Stylesheet */
+
+:root {
+  --hipg-navy: #0F2D59;
+  --hipg-navy-dark: #0A1C38;
+  --hipg-blue: #1D4ED8;
+  --hipg-accent: #EAB308;
+  --hipg-accent-dark: #CA8A04;
+  --hipg-bg: #F8FAFC;
+  --hipg-card-bg: #FFFFFF;
+  --hipg-border: #E2E8F0;
+  --hipg-text: #1E293B;
+  --hipg-muted: #64748B;
+  --hipg-success: #16A34A;
+  --hipg-danger: #DC2626;
+  --hipg-warning: #D97706;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: var(--hipg-bg);
+  color: var(--hipg-text);
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Full Screen Login Portal Wall */
+.login-portal-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #0F2D59 0%, #0A1C38 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+.login-portal-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  padding: 2.25rem;
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Header Navbar */
+header.hipg-navbar {
+  background-color: var(--hipg-navy);
+  color: #FFFFFF;
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(15, 45, 89, 0.15);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.hipg-logo-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.hipg-brand-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.hipg-subbrand {
+  font-size: 0.75rem;
+  color: #94A3B8;
+  display: block;
+}
+
+.user-role-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.user-selector {
+  background-color: var(--hipg-navy-dark);
+  color: #FFFFFF;
+  border: 1px solid #334155;
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  min-height: 40px;
+}
+
+/* Main Container */
+.app-container {
+  max-width: 1280px;
+  margin: 1.25rem auto;
+  padding: 0 1rem;
+}
+
+/* Navigation Tabs */
+.main-nav-tabs {
+  display: flex;
+  gap: 0.5rem;
+  background-color: #E2E8F0;
+  padding: 0.4rem;
+  border-radius: 8px;
+  margin-bottom: 1.25rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.nav-tab-btn {
+  flex: 1;
+  min-width: 140px;
+  padding: 0.75rem 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border: none;
+  background: transparent;
+  color: var(--hipg-muted);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+
+.nav-tab-btn.active {
+  background-color: var(--hipg-navy);
+  color: #FFFFFF;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.nav-tab-btn:hover:not(.active) {
+  background-color: #CBD5E1;
+  color: var(--hipg-navy);
+}
+
+/* Sub-nav Buttons */
+.sub-nav-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 2px solid var(--hipg-border);
+  padding-bottom: 0.75rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sub-tab-btn {
+  padding: 0.55rem 0.9rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  border: 1px solid var(--hipg-border);
+  background-color: #FFFFFF;
+  color: var(--hipg-text);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-height: 40px;
+}
+
+.sub-tab-btn.active {
+  background-color: var(--hipg-blue);
+  color: #FFFFFF;
+  border-color: var(--hipg-blue);
+}
+
+/* Cards & Panels */
+.card-panel {
+  background-color: var(--hipg-card-bg);
+  border: 1px solid var(--hipg-border);
+  border-radius: 10px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  margin-bottom: 1.25rem;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--hipg-navy);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 2px solid #F1F5F9;
+  padding-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Form Elements */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--hipg-navy);
+  margin-bottom: 0.35rem;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  font-size: 0.95rem;
+  border: 1px solid #CBD5E1;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.2s ease;
+  min-height: 42px;
+}
+
+.form-control:focus {
+  border-color: var(--hipg-blue);
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  min-height: 42px;
+  touch-action: manipulation;
+}
+
+.btn-primary { background-color: var(--hipg-blue); color: #FFFFFF; }
+.btn-primary:hover { background-color: #1E40AF; }
+.btn-success { background-color: var(--hipg-success); color: #FFFFFF; }
+.btn-success:hover { background-color: #15803D; }
+.btn-warning { background-color: var(--hipg-accent); color: var(--hipg-navy); }
+.btn-warning:hover { background-color: var(--hipg-accent-dark); color: #FFFFFF; }
+.btn-secondary { background-color: #64748B; color: #FFFFFF; }
+.btn-secondary:hover { background-color: #475569; }
+.btn-outline { border: 1px solid #CBD5E1; background-color: #FFFFFF; color: var(--hipg-text); }
+.btn-outline:hover { background-color: #F1F5F9; }
+
+/* Grid Layouts */
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+/* Vessel & VIN Cards */
+.vessel-card, .chassis-card {
+  border: 1px solid var(--hipg-border);
+  border-radius: 8px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #FFFFFF;
+}
+
+.vessel-card:hover, .chassis-card:hover {
+  border-color: var(--hipg-blue);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.vessel-card.selected, .chassis-card.selected {
+  border: 2px solid var(--hipg-blue);
+  background-color: #EFF6FF;
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 50px;
+  text-transform: uppercase;
+}
+
+.status-pill.no-tally { background-color: #FEF3C7; color: #92400E; }
+.status-pill.confirmed { background-color: #DCFCE7; color: #166534; }
+.status-pill.verified { background-color: #DBEAFE; color: #1E40AF; }
+.status-pill.unverified { background-color: #FEE2E2; color: #991B1B; }
+
+/* Checklist Grid */
+.checklist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.6rem;
+  background-color: #F8FAFC;
+  padding: 0.85rem;
+  border-radius: 8px;
+  border: 1px solid #E2E8F0;
+}
+
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #FFFFFF;
+  padding: 0.6rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #CBD5E1;
+  font-size: 0.85rem;
+  font-weight: 600;
+  min-height: 44px;
+}
+
+.check-item input[type="checkbox"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: var(--hipg-blue);
+  cursor: pointer;
+}
+
+/* Damage Code Badges */
+.damage-codes-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.damage-code-badge {
+  padding: 0.4rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 6px;
+  background-color: #F1F5F9;
+  border: 1px solid #CBD5E1;
+  cursor: pointer;
+  touch-action: manipulation;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.damage-code-badge.active {
+  background-color: var(--hipg-danger);
+  color: #FFFFFF;
+  border-color: var(--hipg-danger);
+}
+
+/* Drawing Canvas Container */
+.canvas-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  border: 2px dashed #CBD5E1;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #000000;
+  touch-action: none;
+}
+
+#damageCanvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.canvas-controls {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Scrollable Responsive Table Wrapper */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 1rem;
+}
+
+/* Official Tally Sheet Layout */
+.official-tally-sheet {
+  background-color: #FFFFFF;
+  border: 2px solid var(--hipg-navy);
+  padding: 1.25rem;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  margin-top: 1rem;
+  overflow-x: auto;
+}
+
+.tally-header {
+  border-bottom: 3px double var(--hipg-navy);
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.tally-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.5rem;
+  background-color: #F1F5F9;
+  padding: 0.6rem;
+  border: 1px solid #CBD5E1;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+}
+
+.meta-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.meta-label {
+  font-size: 0.7rem;
+  color: var(--hipg-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.meta-value {
+  font-weight: 800;
+  color: var(--hipg-navy);
+  word-break: break-word;
+}
+
+.tally-checklist-table, .audit-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+  margin-bottom: 1rem;
+  min-width: 550px;
+}
+
+.tally-checklist-table th, .tally-checklist-table td,
+.audit-table th, .audit-table td {
+  border: 1px solid #94A3B8;
+  padding: 0.4rem 0.5rem;
+  text-align: left;
+}
+
+.tally-checklist-table th, .audit-table th {
+  background-color: var(--hipg-navy);
+  color: #FFFFFF;
+  font-weight: 700;
+}
+
+.audit-table th {
+  background-color: #E2E8F0;
+  color: var(--hipg-navy);
+}
+
+.photo-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.photo-card {
+  border: 1px solid #E2E8F0;
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: #000;
+}
+
+.photo-card img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  display: block;
+}
+
+.photo-caption {
+  padding: 0.4rem;
+  font-size: 0.72rem;
+  color: #FFFFFF;
+  background-color: var(--hipg-navy-dark);
+  text-align: center;
+}
+
+.hidden { display: none !important; }
+
+/* Mobile & Tablet Specific Responsive Styles */
+@media (max-width: 768px) {
+  header.hipg-navbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .user-role-bar {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .user-selector {
+    flex: 1;
+  }
+  .card-panel {
+    padding: 1rem;
+  }
+  .checklist-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  }
+  .tally-meta-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .login-portal-card {
+    padding: 1.5rem;
+  }
+}
+
+@media print {
+  header.hipg-navbar, .main-nav-tabs, .sub-nav-bar, .no-print, .login-portal-screen {
+    display: none !important;
+  }
+  body { background-color: #FFFFFF; }
+  .official-tally-sheet { box-shadow: none; border: none; padding: 0; }
+}
