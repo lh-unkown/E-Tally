@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HIPG - e-Tally System | RORO Local & Transshipment Cargo</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- FULL-SCREEN LOGIN PORTAL (MANDATORY SYSTEM WALL) -->
+  <div id="loginPortal" class="login-portal-screen">
+    <div class="login-portal-card">
+      <div style="text-align: center; margin-bottom: 1.5rem;">
+        <img src="hipg_logo.png" alt="HIPG Logo" style="height: 52px; background: white; padding: 4px 10px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+        <h2 style="color: var(--hipg-navy); font-weight: 900; margin-top: 0.75rem; font-size: 1.35rem;">HAMBANTOTA INTERNATIONAL PORT GROUP</h2>
+        <p style="color: var(--hipg-muted); font-size: 0.88rem; font-weight: 600;">e-Tally System for Local Import & Transshipment RORO Cargo</p>
+      </div>
+
+      <div style="background: #EFF6FF; border: 1px solid #BFDBFE; padding: 0.75rem; border-radius: 6px; margin-bottom: 1.25rem; font-size: 0.85rem; color: var(--hipg-blue);">
+        🔒 <strong>Restricted Access:</strong> Please sign in with your authorized User ID and Password to enter the port system.
+      </div>
+
+      <div id="loginErrorAlert" class="hidden" style="background: #FEE2E2; border: 1px solid #EF4444; color: #991B1B; padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.85rem; font-weight: 600;">
+        ❌ Invalid username or password. Please try again.
+      </div>
+
+      <form onsubmit="handlePortalLogin(event)">
+        <div class="form-group">
+          <label class="form-label">Username / User ID:</label>
+          <input type="text" id="portalUsername" class="form-control" placeholder="Enter username (e.g. admin, surveyor298)..." required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password:</label>
+          <input type="password" id="portalPassword" class="form-control" placeholder="Enter password..." required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem; font-size: 1rem; padding: 0.8rem;">
+          🔑 Sign In to System
+        </button>
+      </form>
+
+      <!-- Demo Quick Login Buttons -->
+      <div style="margin-top: 1.5rem; border-top: 1px solid #E2E8F0; padding-top: 1rem;">
+        <label style="font-size: 0.75rem; font-weight: 700; color: var(--hipg-muted); text-transform: uppercase; display: block; margin-bottom: 0.5rem;">
+          Demo Quick Sign In (Click Role):
+        </label>
+        <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+          <button class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="quickLogin('admin', 'admin123')">⚙️ Admin</button>
+          <button class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="quickLogin('surveyor298', 'pass123')">📋 Surveyor 298</button>
+          <button class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="quickLogin('supervisor352', 'pass123')">🔄 Supervisor 352</button>
+          <button class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;" onclick="quickLogin('security5958', 'pass123')">🛡️ Security 5958</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROTECTED APPLICATION WRAPPER (HIDDEN UNTIL LOGIN) -->
+  <div id="appProtectedWrapper" class="hidden">
+
+    <!-- Top Navbar -->
+    <header class="hipg-navbar">
+      <div class="hipg-logo-brand">
+        <img src="hipg_logo.png" alt="HIPG Logo" style="height: 38px; background: white; padding: 2px 6px; border-radius: 4px;">
+        <div>
+          <span class="hipg-brand-title">HAMBANTOTA INTERNATIONAL PORT GROUP</span>
+          <span class="hipg-subbrand">e-Tally Process for Local Import & Transshipment RORO Cargo</span>
+        </div>
+      </div>
+      <div class="user-role-bar">
+        <span style="font-size: 0.85rem; opacity: 0.9;">Authenticated User:</span>
+        <div id="loggedInUserBadge" style="background: var(--hipg-navy-dark); color: #FFF; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.88rem; font-weight: 700; border: 1px solid #334155;">
+          System Administrator (Admin)
+        </div>
+        <button class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; background: #DC2626;" onclick="handleUserLogout()">🚪 Logout</button>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="app-container">
+
+      <!-- Navigation Tabs -->
+      <nav class="main-nav-tabs">
+        <button class="nav-tab-btn active" id="tabIssueBtn" onclick="switchMainTab('issue')">
+          📋 Issue Tally Sheet
+        </button>
+        <button class="nav-tab-btn" id="tabInquireBtn" onclick="switchMainTab('inquire')">
+          🔍 Inquire Vehicle Tally
+        </button>
+        <button class="nav-tab-btn" id="tabGenerateBtn" onclick="switchMainTab('generate')">
+          📄 Tally Generate (Bulk PDF)
+        </button>
+        <button class="nav-tab-btn hidden" id="tabAdminBtn" onclick="switchMainTab('admin')">
+          ⚙️ Admin Control Panel
+        </button>
+      </nav>
+
+      <!-- SECTION 1: ISSUE TALLY SHEET -->
+      <section id="sectionIssue" class="tab-section">
+
+        <!-- Sub Navigation -->
+        <div class="sub-nav-bar">
+          <button class="sub-tab-btn active" id="subTabOnboardBtn" onclick="switchSubTab('onboard')">🚢 On-board Tally</button>
+          <button class="sub-tab-btn" id="subTabExportBtn" onclick="switchSubTab('export')">🏗️ Yard: Export Tally</button>
+          <button class="sub-tab-btn" id="subTabUpdateBtn" onclick="switchSubTab('update')">🔄 Yard: Tally Update</button>
+          <button class="sub-tab-btn" id="subTabSecurityBtn" onclick="switchSubTab('security')">🛡️ Yard: Security Check</button>
+        </div>
+
+        <!-- 1.1 ON-BOARD TALLY WORKFLOW -->
+        <div id="subViewOnboard">
+
+          <!-- Workflow Step Indicator -->
+          <div class="card-panel" style="background: #F1F5F9; padding: 0.75rem 1rem;">
+            <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 0.85rem; color: var(--hipg-navy);">
+              <span id="stepBadge1" style="color: var(--hipg-blue);">1. Select Vessel</span> ➔ 
+              <span id="stepBadge2" style="color: var(--hipg-muted);">2. Select Chassis / VIN</span> ➔ 
+              <span id="stepBadge3" style="color: var(--hipg-muted);">3. Accessories Checklist</span> ➔ 
+              <span id="stepBadge4" style="color: var(--hipg-muted);">4. Damage & Photos</span> ➔ 
+              <span id="stepBadge5" style="color: var(--hipg-muted);">5. Save & Confirm</span>
+            </div>
+          </div>
+
+          <!-- STEP 1: Vessel Selection -->
+          <div id="stepVessel" class="card-panel">
+            <div class="card-title">🚢 Select Vessel at Berth</div>
+            <p style="font-size: 0.88rem; color: var(--hipg-muted); margin-bottom: 1rem;">
+              Choose from currently berthed RORO vessels to view active VIN discharge manifests.
+            </p>
+            <div id="vesselsGrid" class="grid-3">
+              <!-- Vessel Cards Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- STEP 2: Chassis / VIN Selection -->
+          <div id="stepChassis" class="card-panel hidden">
+            <div class="card-title" style="justify-content: space-between;">
+              <span>🚗 Select Chassis / VIN Number</span>
+              <button class="btn btn-outline" onclick="goToStep('vessel')">⬅️ Back to Vessels</button>
+            </div>
+            <div style="background-color: #EFF6FF; border: 1px solid #BFDBFE; padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.88rem;">
+              <strong>Selected Vessel:</strong> <span id="selectedVesselNameLabel">-</span> | <strong>Voyage:</strong> <span id="selectedVesselVoyageLabel">-</span>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+              <input type="text" id="vinSearchInput" class="form-control" placeholder="Search by last 6 digits of VIN/Chassis (e.g. 268273 or 143285)..." onkeyup="filterChassisList()">
+            </div>
+
+            <div id="chassisGrid" class="grid-2">
+              <!-- Chassis Cards Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- STEP 3: Vehicle Accessories Checklist (AI vs Manual) -->
+          <div id="stepAccessories" class="card-panel hidden">
+            <div class="card-title" style="justify-content: space-between;">
+              <span>📦 Vehicle Item / Accessories Checklist</span>
+              <div>
+                <button class="btn btn-outline" onclick="goToStep('chassis')">⬅️ Back to Chassis</button>
+              </div>
+            </div>
+
+            <!-- Active VIN Summary Banner -->
+            <div style="background: var(--hipg-navy); color: white; padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <strong style="font-size: 1.1rem; color: var(--hipg-accent);" id="activeVinLabel">RV5-1268273</strong>
+                <span style="font-size: 0.85rem; margin-left: 0.75rem;" id="activeVinModelLabel">(Toyota VEZEL - Pearl White)</span>
+              </div>
+              <div>
+                <span class="status-pill no-tally" id="activeVinTallyStatus">No Tally</span>
+              </div>
+            </div>
+
+            <!-- Mode Toggle: AI Mode vs Manual Mode -->
+            <div style="display: flex; justify-content: space-between; align-items: center; background-color: #F8FAFC; border: 1px solid #CBD5E1; padding: 0.75rem; border-radius: 8px; margin-bottom: 1.25rem;">
+              <div>
+                <strong>Checklist Mode:</strong>
+                <span id="currentModeBadge" style="font-size: 0.85rem; color: var(--hipg-blue); font-weight: 700; margin-left: 0.5rem;">MANUAL MODE</span>
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                <button class="btn btn-warning" id="btnAiMode" onclick="toggleTallyMode('AI')">✨ Run AI Photo Auto-Fill</button>
+                <button class="btn btn-outline" id="btnManualMode" onclick="toggleTallyMode('MANUAL')">📝 Manual Mode</button>
+              </div>
+            </div>
+
+            <!-- AI Mode Banner -->
+            <div id="aiModeBanner" class="hidden" style="background-color: #FEF3C7; border: 1px solid #F59E0B; padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.85rem;">
+              🤖 <strong>AI Identification Active:</strong> Items pre-validated from vehicle photo analysis. You can review, add, edit, or remove items before final submission.
+            </div>
+
+            <!-- Accessories Form Grid -->
+            <div class="checklist-grid" id="accessoriesChecklistGrid">
+              <!-- Items rendered dynamically via JS -->
+            </div>
+
+            <div style="margin-top: 1.5rem; text-align: right;">
+              <button class="btn btn-primary" onclick="goToStep('damage')">Proceed to Damage Recording ➡️</button>
+            </div>
+          </div>
+
+          <!-- STEP 4: Damage Recording & Photo Canvas Marking -->
+          <div id="stepDamage" class="card-panel hidden">
+            <div class="card-title" style="justify-content: space-between;">
+              <span>📸 Vehicle Damage Recording & Photo Canvas Marking</span>
+              <button class="btn btn-outline" onclick="goToStep('accessories')">⬅️ Back to Accessories</button>
+            </div>
+
+            <p style="font-size: 0.85rem; color: var(--hipg-muted); margin-bottom: 1rem;">
+              Select predefined damage codes, upload/capture damage photographs, and use the canvas drawing tool to outline or circle the exact damage area.
+            </p>
+
+            <!-- Damage Codes Quick Picker -->
+            <div class="form-group">
+              <label class="form-label">Standard Damage Codes (Select Applicable):</label>
+              <div class="damage-codes-list" id="damageCodesContainer">
+                <!-- 1-Torn to 15-No Fuel rendered via JS -->
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <!-- Left: Add Damage Entry Form -->
+              <div style="background-color: #F8FAFC; border: 1px solid #E2E8F0; padding: 1rem; border-radius: 8px;">
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--hipg-navy); margin-bottom: 0.75rem;">Record Specific Damage</h4>
+                
+                <div class="form-group">
+                  <label class="form-label">Damage Type / Code:</label>
+                  <select id="damageTypeSelect" class="form-control">
+                    <option value="6-Scratched">6 - Scratched</option>
+                    <option value="7-Dented">7 - Dented</option>
+                    <option value="3-Glass Cracked">3 - Glass Cracked</option>
+                    <option value="1-Torn">1 - Torn</option>
+                    <option value="2-Bent">2 - Bent</option>
+                    <option value="4-Rusty">4 - Rusty</option>
+                    <option value="5-Creased">5 - Creased</option>
+                    <option value="8-Smashed">8 - Smashed</option>
+                    <option value="9-Missing">9 - Missing</option>
+                    <option value="10-Pitted">10 - Pitted</option>
+                    <option value="11-Broken">11 - Broken</option>
+                    <option value="12-Stained">12 - Stained</option>
+                    <option value="13-Flat Tyre">13 - Flat Tyre</option>
+                    <option value="14-Jump Start">14 - Jump Start</option>
+                    <option value="15-No fuel">15 - No fuel</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Damage Location / Component:</label>
+                  <input type="text" id="damageLocationInput" class="form-control" placeholder="e.g. Front Right Bumper, Left Rear Door...">
+                </div>
+
+                <button class="btn btn-outline" style="width: 100%;" onclick="addRecordedDamage()">➕ Add Damage Entry</button>
+
+                <!-- Recorded Damage List -->
+                <div style="margin-top: 1rem;">
+                  <label class="form-label">Current Recorded Damages:</label>
+                  <ul id="recordedDamagesList" style="list-style: none; padding: 0;">
+                    <!-- Dynamic damage list -->
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Right: Interactive Photo Annotation Canvas Tool -->
+              <div style="background-color: #F8FAFC; border: 1px solid #E2E8F0; padding: 1rem; border-radius: 8px;">
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--hipg-navy); margin-bottom: 0.75rem;">Photo Annotation Tool</h4>
+                
+                <div class="form-group">
+                  <label class="form-label">Upload or Select Photo:</label>
+                  <input type="file" id="photoFileInput" accept="image/*" class="form-control" onchange="loadPhotoToCanvas(event)">
+                </div>
+
+                <!-- Canvas element -->
+                <div class="canvas-wrapper">
+                  <canvas id="damageCanvas" width="450" height="300"></canvas>
+                </div>
+
+                <div class="canvas-controls">
+                  <button class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="clearCanvas()">🧹 Clear Markings</button>
+                  <button class="btn btn-warning" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="saveAnnotatedPhoto()">💾 Save Photo Annotation</button>
+                </div>
+
+                <div style="margin-top: 1rem;">
+                  <label class="form-label">Saved Photos Evidence:</label>
+                  <div id="savedPhotosGallery" class="photo-gallery">
+                    <!-- Uploaded base64 images rendered here -->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 1.25rem;">
+              <label class="form-label">General Remarks & Vehicle Notes:</label>
+              <textarea id="tallyRemarksInput" class="form-control" rows="2" placeholder="Input any special accessories note, phone holder, spare key notes..."></textarea>
+            </div>
+
+            <div style="margin-top: 1.5rem; text-align: right;">
+              <button class="btn btn-primary" onclick="goToStep('review')">Save & Preview Tally Sheet ➡️</button>
+            </div>
+          </div>
+
+          <!-- STEP 5: Tally Sheet Review Mode & Lock Confirmation -->
+          <div id="stepReview" class="card-panel hidden">
+            <div class="card-title" style="justify-content: space-between;">
+              <span>📋 Tally Sheet Review & Confirmation</span>
+              <button class="btn btn-outline" onclick="goToStep('damage')">⬅️ Amend Details</button>
+            </div>
+
+            <div style="background-color: #FEF3C7; border: 1px solid #F59E0B; padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.88rem;">
+              <strong>Review Mode:</strong> Please inspect all recorded items and damage evidence. Click <strong>Confirm Tally Sheet</strong> to lock the record permanently for audit logging.
+            </div>
+
+            <!-- Digital e-Tally Format Preview -->
+            <div id="reviewTallySheetPreview" class="official-tally-sheet">
+              <!-- Rendered via JS matching physical Doc Ref 20586 layout -->
+            </div>
+
+            <div style="margin-top: 1.5rem; display: flex; justify-content: space-between;">
+              <button class="btn btn-outline" onclick="goToStep('accessories')">✏️ Jump to Accessories</button>
+              <button class="btn btn-success" style="font-size: 1rem; padding: 0.75rem 2rem;" onclick="confirmFinalTallySheet()">
+                🔒 Confirm & Lock Tally Sheet
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 1.2 YARD: EXPORT TALLY -->
+        <div id="subViewExport" class="hidden">
+          <div class="card-panel">
+            <div class="card-title">🏗️ Yard Export Tally (Gate Received Cargo)</div>
+            <p style="font-size: 0.88rem; color: var(--hipg-muted); margin-bottom: 1rem;">
+              Pre-advised export chassis numbers received through gate. Select VIN to initiate tally checklist.
+            </p>
+            <div class="grid-2" id="exportChassisGrid">
+              <!-- Export VINs list -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 1.3 YARD: TALLY UPDATE -->
+        <div id="subViewUpdate" class="hidden">
+          <div class="card-panel">
+            <div class="card-title">🔄 Tally Update (Requires Supervisor Approval)</div>
+            <p style="font-size: 0.88rem; color: var(--hipg-muted); margin-bottom: 1rem;">
+              Amending a confirmed tally requires prior approval from an authorized supervisor.
+            </p>
+
+            <div id="approvalRoleSection" style="margin-bottom: 1.5rem;">
+              <!-- Pending approvals for Supervisor or request button for Surveyor -->
+            </div>
+
+            <div id="approvedChassisForUpdateList">
+              <!-- Approved chassis list ready for editing -->
+            </div>
+          </div>
+        </div>
+
+        <!-- 1.4 YARD: SECURITY CHECK -->
+        <div id="subViewSecurity" class="hidden">
+          <div class="card-panel">
+            <div class="card-title">🛡️ Discharged Vehicle Security Check</div>
+            <p style="font-size: 0.88rem; color: var(--hipg-muted); margin-bottom: 1rem;">
+              Security Team verification of discharged vehicle condition against issued tally sheet.
+            </p>
+
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+              <input type="text" id="securityVinSearchInput" class="form-control" placeholder="Enter last 6 digits of VIN (e.g. 268273)...">
+              <button class="btn btn-primary" onclick="searchSecurityChassis()">🔍 Search Vehicle</button>
+            </div>
+
+            <div id="securitySearchResultPanel" class="hidden">
+              <!-- Displayed when vehicle searched -->
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- SECTION 2: INQUIRE VEHICLE TALLY -->
+      <section id="sectionInquire" class="tab-section hidden">
+        <div class="card-panel">
+          <div class="card-title">🔍 Inquire Vehicle Tally Sheet</div>
+          <p style="font-size: 0.88rem; color: var(--hipg-muted); margin-bottom: 1rem;">
+            Search for any registered vehicle by entering the last six digits or full VIN to inspect the digital tally sheet and Work Point audit trail.
+          </p>
+
+          <div style="display: flex; gap: 1rem; max-width: 600px; margin-bottom: 1.5rem;">
+            <input type="text" id="inquireInput" class="form-control" placeholder="Search last 6 digits (e.g. 268273, 143285)...">
+            <button class="btn btn-primary" onclick="runInquireSearch()">🔍 Search</button>
+          </div>
+
+          <div id="inquireResultsContainer">
+            <!-- Rendered official tally sheet format & audit trail table -->
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 3: TALLY GENERATE (BULK PDF) -->
+      <section id="sectionGenerate" class="tab-section hidden">
+        <div class="card-panel">
+          <div class="card-title">📄 Bulk Tally Sheet PDF Generator</div>
+          <p style="font-size: 0.88rem; color: var(--hipg-muted); margin-bottom: 1rem;">
+            Enter or paste multiple VIN/Chassis numbers to validate and generate printable official PDF tally sheets in bulk.
+          </p>
+
+          <div class="form-group">
+            <label class="form-label">Enter / Paste VIN/Chassis Numbers (One per line or comma separated):</label>
+            <textarea id="bulkVinInput" class="form-control" rows="4" placeholder="RV5-1268273&#10;KDH2010143285&#10;ZVW30-5849102&#10;NKE165-3819204"></textarea>
+          </div>
+
+          <button class="btn btn-primary" onclick="processBulkInquire()">🔍 Validate & Search VINs</button>
+
+          <!-- Bulk Results Table -->
+          <div id="bulkResultsContainer" class="hidden" style="margin-top: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <div>
+                <strong>Validated Records:</strong> 
+                <span id="matchedVinCountBadge" class="status-pill confirmed">0 Matched</span>
+                <span id="unmatchedVinCountBadge" class="status-pill unverified">0 Unmatched</span>
+              </div>
+              <button class="btn btn-success" onclick="generateSelectedPdfs()">📥 Generate Selected PDFs</button>
+            </div>
+
+            <table class="tally-checklist-table" id="bulkChassisTable">
+              <thead>
+                <tr>
+                  <th style="width: 40px; text-align: center;"><input type="checkbox" id="selectAllBulkCheck" onchange="toggleSelectAllBulk(this)"></th>
+                  <th>VIN / Chassis No</th>
+                  <th>Model</th>
+                  <th>Vessel / Voyage</th>
+                  <th>Tally Status</th>
+                  <th>Doc Ref</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="bulkTableBody">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 4: ADMIN CONTROL PANEL -->
+      <section id="sectionAdmin" class="tab-section hidden">
+        <div class="card-panel">
+          <div class="card-title" style="justify-content: space-between;">
+            <span>⚙️ System Administrator Management Panel</span>
+            <span class="status-pill confirmed" style="background:#0F2D59; color:#FFF;">SUPERUSER PRIVILEGES</span>
+          </div>
+
+          <!-- Admin Sub Navigation -->
+          <div class="sub-nav-bar">
+            <button class="sub-tab-btn active" id="adminTabUsersBtn" onclick="switchAdminSubTab('users')">👥 User Accounts</button>
+            <button class="sub-tab-btn" id="adminTabTallyBtn" onclick="switchAdminSubTab('tally')">🔓 Master Tally Override</button>
+            <button class="sub-tab-btn" id="adminTabVesselsBtn" onclick="switchAdminSubTab('vessels')">🚢 Vessel & Cargo Registry</button>
+            <button class="sub-tab-btn" id="adminTabAuditBtn" onclick="switchAdminSubTab('audit')">📜 Global System Audit Log</button>
+          </div>
+
+          <!-- 4.1 Admin Users Management -->
+          <div id="adminViewUsers">
+            <div class="grid-2">
+              <!-- Create User Form -->
+              <div style="background:#F8FAFC; border:1px solid #CBD5E1; padding:1.25rem; border-radius:8px;">
+                <h4 style="color:var(--hipg-navy); font-weight:700; margin-bottom:1rem;">➕ Create / Edit User Account</h4>
+                <form id="adminUserForm" onsubmit="handleAdminCreateUser(event)">
+                  <div class="form-group">
+                    <label class="form-label">Username / User ID:</label>
+                    <input type="text" id="adminUsername" class="form-control" placeholder="e.g. surveyor301, supervisor353..." required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Full Name / Display Name:</label>
+                    <input type="text" id="adminName" class="form-control" placeholder="e.g. Surveyor Kamal, Officer Perera..." required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Role & Access Level:</label>
+                    <select id="adminRole" class="form-control">
+                      <option value="Surveyor">Surveyor (IMPL Tallyman)</option>
+                      <option value="Supervisor">Supervisor (Port Approver)</option>
+                      <option value="Security">Security Officer</option>
+                      <option value="Driver">Driver (Yard Handler)</option>
+                      <option value="Admin">Admin (System Administrator)</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Password:</label>
+                    <input type="password" id="adminPassword" class="form-control" placeholder="Set user password..." required>
+                  </div>
+                  <button type="submit" class="btn btn-primary" style="width:100%;">💾 Save User Account</button>
+                </form>
+              </div>
+
+              <!-- Existing Users List -->
+              <div>
+                <h4 style="color:var(--hipg-navy); font-weight:700; margin-bottom:0.75rem;">Registered System Accounts</h4>
+                <table class="tally-checklist-table">
+                  <thead>
+                    <tr>
+                      <th>User ID</th>
+                      <th>Name</th>
+                      <th>Role</th>
+                      <th>Status</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="adminUsersTableBody">
+                    <!-- Rendered via JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4.2 Master Tally Sheet Override -->
+          <div id="adminViewTally" class="hidden">
+            <div style="background:#FFFBEB; border:1px solid #FCD34D; padding:1rem; border-radius:8px; margin-bottom:1.5rem;">
+              <h4 style="color:#92400E;">⚠️ Superuser Master Override Controls</h4>
+              <p style="font-size:0.85rem; color:var(--hipg-muted);">
+                As an Administrator, you have full privileges to unlock, force-amend, or permanently delete any confirmed tally sheet without requiring supervisor approvals.
+              </p>
+            </div>
+
+            <div style="display:flex; gap:1rem; max-width:600px; margin-bottom:1.5rem;">
+              <input type="text" id="adminOverrideVinInput" class="form-control" placeholder="Enter VIN/Chassis to Override (e.g. RV5-1268273)...">
+              <button class="btn btn-warning" onclick="adminForceUnlockTally()">🔓 Force Unlock Tally</button>
+              <button class="btn btn-secondary" style="background:#DC2626;" onclick="adminPurgeTally()">🗑️ Delete Tally</button>
+            </div>
+          </div>
+
+          <!-- 4.3 Vessel & Cargo Registry -->
+          <div id="adminViewVessels" class="hidden">
+            <div class="grid-2">
+              <!-- Add Vessel -->
+              <div style="background:#F8FAFC; border:1px solid #CBD5E1; padding:1rem; border-radius:8px;">
+                <h4 style="color:var(--hipg-navy);">🚢 Register New Berthed Vessel</h4>
+                <form onsubmit="handleAdminAddVessel(event)">
+                  <div class="form-group"><label class="form-label">Vessel Name:</label><input type="text" id="adminVesselName" class="form-control" required placeholder="e.g. NYK ORION"></div>
+                  <div class="form-group"><label class="form-label">Voyage No:</label><input type="text" id="adminVoyage" class="form-control" required placeholder="e.g. 52A"></div>
+                  <div class="form-group"><label class="form-label">Berth Location:</label><input type="text" id="adminBerth" class="form-control" value="Berth 1"></div>
+                  <div class="form-group"><label class="form-label">Total Units Manifested:</label><input type="number" id="adminUnits" class="form-control" value="150"></div>
+                  <button class="btn btn-primary" type="submit">➕ Register Vessel</button>
+                </form>
+              </div>
+
+              <!-- Add Chassis VIN -->
+              <div style="background:#F8FAFC; border:1px solid #CBD5E1; padding:1rem; border-radius:8px;">
+                <h4 style="color:var(--hipg-navy);">🚗 Add Chassis VIN to Manifest</h4>
+                <form onsubmit="handleAdminAddChassis(event)">
+                  <div class="form-group"><label class="form-label">Full VIN/Chassis No:</label><input type="text" id="adminChassisVin" class="form-control" required placeholder="e.g. ZVW50-9988112"></div>
+                  <div class="form-group"><label class="form-label">Vehicle Model:</label><input type="text" id="adminChassisModel" class="form-control" required placeholder="e.g. PRIUS 50"></div>
+                  <div class="form-group"><label class="form-label">Color:</label><input type="text" id="adminChassisColor" class="form-control" value="White"></div>
+                  <div class="form-group"><label class="form-label">Target Yard Location:</label><input type="text" id="adminChassisYard" class="form-control" value="Yard A"></div>
+                  <button class="btn btn-success" type="submit">➕ Add Chassis VIN</button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4.4 Global Audit Log -->
+          <div id="adminViewAudit" class="hidden">
+            <h4 style="color:var(--hipg-navy); margin-bottom:0.75rem;">Global System Operations Audit Trail</h4>
+            <table class="tally-checklist-table">
+              <thead>
+                <tr>
+                  <th>Log ID</th>
+                  <th>Timestamp</th>
+                  <th>VIN</th>
+                  <th>Work Point</th>
+                  <th>User / Role</th>
+                  <th>Operation Details</th>
+                </tr>
+              </thead>
+              <tbody id="adminAuditLogBody">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

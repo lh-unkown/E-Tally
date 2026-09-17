@@ -1,0 +1,2 @@
+# HIPG e-Tally System Requirements
+# Python standard library used (sqlite3, http, json, urllib)
