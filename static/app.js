@@ -881,9 +881,9 @@ function renderOfficialTallyPreview(targetContainerId, chassisObj, tallyData) {
     </div>
 
     <!-- Vehicle Item / Accessories Checklist -->
-    <div style="font-weight:700; font-size:0.85rem; color:var(--hipg-navy); margin-bottom:0.4rem;">VEHICLE ITEM / ACCESSORIES TALLY CHECKLIST</div>
-    <div class="table-responsive">
-      <table class="tally-checklist-table">
+    <div style="font-weight:700; font-size:0.85rem; color:var(--hipg-navy); margin-top:1.25rem; margin-bottom:0.5rem; letter-spacing:0.3px;">VEHICLE ITEM / ACCESSORIES TALLY CHECKLIST</div>
+    <div class="table-responsive" style="margin-bottom: 1rem;">
+      <table class="tally-checklist-table" style="margin-bottom:0;">
         <thead>
           <tr>
             <th>ITEM DESCRIPTION</th>
@@ -940,9 +940,9 @@ function renderOfficialTallyPreview(targetContainerId, chassisObj, tallyData) {
     </div>
 
     <!-- Damage Summary -->
-    <div style="font-weight:700; font-size:0.85rem; color:var(--hipg-navy); margin-bottom:0.4rem;">DAMAGE RECORD & CONDITION CODE SUMMARY</div>
-    <div class="table-responsive">
-      <table class="tally-checklist-table">
+    <div style="font-weight:700; font-size:0.85rem; color:var(--hipg-navy); margin-top:1.5rem; margin-bottom:0.5rem; letter-spacing:0.3px;">DAMAGE RECORD & CONDITION CODE SUMMARY</div>
+    <div class="table-responsive" style="margin-bottom: 1rem;">
+      <table class="tally-checklist-table" style="margin-bottom:0;">
         <thead>
           <tr>
             <th style="width: 25%;">DAMAGE TYPE</th>
@@ -955,16 +955,16 @@ function renderOfficialTallyPreview(targetContainerId, chassisObj, tallyData) {
       </table>
     </div>
 
-    <div style="background:#F8FAFC; border:1px solid #CBD5E1; padding:0.5rem 0.75rem; border-radius:6px; font-size:0.85rem;">
-      <strong>Remarks:</strong> ${remarks}
+    <div style="background:#F8FAFC; border:1px solid #CBD5E1; padding:0.6rem 0.85rem; border-radius:6px; font-size:0.85rem; margin-top:0.75rem; margin-bottom:1.25rem;">
+      <strong style="color:var(--hipg-navy);">Remarks:</strong> ${remarks}
     </div>
 
     ${photosHtml}
 
     <!-- Work Point Audit Trail Table -->
-    <div style="font-weight:700; font-size:0.85rem; color:var(--hipg-navy); margin-top:1rem; margin-bottom:0.4rem;">WORK POINT AUDIT TRAIL RECORD</div>
-    <div class="table-responsive">
-      <table class="audit-table" id="previewAuditTable">
+    <div style="font-weight:700; font-size:0.85rem; color:var(--hipg-navy); margin-top:1.5rem; margin-bottom:0.5rem; letter-spacing:0.3px;">WORK POINT AUDIT TRAIL RECORD</div>
+    <div class="table-responsive" style="margin-bottom:0.5rem;">
+      <table class="audit-table" style="margin-bottom:0;" id="previewAuditTable">
         <thead>
           <tr>
             <th>Work Point</th>
