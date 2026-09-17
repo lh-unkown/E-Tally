@@ -821,6 +821,9 @@ async function confirmFinalTallySheet() {
     return;
   }
 
+  const isSupervisorOrAdmin = currentUser && (currentUser.role === 'Supervisor' || currentUser.role === 'Admin');
+  const targetStatus = isSupervisorOrAdmin ? "Confirmed" : "Pending Approval";
+
   activeTallyData.remarks = document.getElementById("tallyRemarksInput").value;
 
   const payload = {
@@ -828,7 +831,7 @@ async function confirmFinalTallySheet() {
     doc_ref: "20586",
     vessel_id: selectedChassis.vessel_id,
     tally_type: "ONBOARD",
-    status: "Confirmed",
+    status: targetStatus,
     accessories: activeTallyData.accessories,
     damages: activeTallyData.damages,
     photos: activeTallyData.photos,
@@ -844,14 +847,104 @@ async function confirmFinalTallySheet() {
     });
     const data = await res.json();
     if (data.success) {
-      alert(`✅ Tally Sheet CONFIRMED & LOCKED for VIN ${selectedChassis.vin}! Record has been locked for audit.`);
-      selectedChassis.tally_status = "Confirmed";
-      loadChassisForVessel(selectedChassis.vessel_id);
+      if (isSupervisorOrAdmin) {
+        alert(`✅ Tally Sheet CONFIRMED & LOCKED for VIN ${selectedChassis.vin}! Record has been locked for audit.`);
+        selectedChassis.tally_status = "Confirmed";
+      } else {
+        alert(`✅ Tally Sheet SUBMITTED for Security Verification & Supervisor Approval for VIN ${selectedChassis.vin}! Record is now pending approval.`);
+        selectedChassis.tally_status = "Pending Approval";
+      }
+      if (selectedChassis.vessel_id) loadChassisForVessel(selectedChassis.vessel_id);
+      refreshSupervisorPendingTallies();
       switchMainTab('inquire');
       runInquireSearch(selectedChassis.last_6);
     }
   } catch (err) {
     console.error("Error confirming tally:", err);
+  }
+}
+
+async function refreshSupervisorPendingTallies() {
+  const panel = document.getElementById("supervisorPendingPanel");
+  const container = document.getElementById("supervisorPendingListContainer");
+  if (!panel || !container) return;
+
+  const isSupervisorOrAdmin = currentUser && (currentUser.role === "Supervisor" || currentUser.role === "Admin");
+  if (!isSupervisorOrAdmin) {
+    panel.classList.add("hidden");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/supervisor/pending-tallies");
+    const data = await res.json();
+    if (data.success) {
+      const list = data.pending_tallies || [];
+      if (list.length > 0) {
+        panel.classList.remove("hidden");
+      } else {
+        panel.classList.add("hidden");
+        return;
+      }
+
+      container.innerHTML = "";
+      list.forEach(a => {
+        const card = document.createElement("div");
+        card.style.cssText = "background:#FFFFFF; border:1px solid #CBD5E1; border-radius:8px; padding:0.85rem; margin-bottom:0.75rem; box-shadow:0 2px 6px rgba(0,0,0,0.05);";
+
+        const secStatusBadge = a.can_approve
+          ? `<span class="status-pill verified" style="font-size:0.75rem; background:#DCFCE7; color:#166534; border:1px solid #86EFAC;">🛡️ SECURITY VERIFIED (by ${a.security_checked_by || 'Security'})</span>`
+          : `<span class="status-pill warning" style="font-size:0.75rem; background:#FEF3C7; color:#92400E; border:1px solid #FCD34D;">⏳ PENDING SECURITY CHECK</span>`;
+
+        const approveBtnHtml = a.can_approve
+          ? `<button class="btn btn-success" style="padding:0.45rem 1.1rem; font-size:0.85rem; font-weight:700;" onclick="approveTallyAsSupervisor('${a.vin}')">✅ Approve & Lock Tally</button>`
+          : `<button class="btn btn-secondary" disabled style="padding:0.45rem 1.1rem; font-size:0.85rem; opacity:0.55; cursor:not-allowed;" title="Security Officer must complete Security Check before Supervisor can approve">🔒 Pending Security Check</button>`;
+
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
+            <div>
+              <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                <strong style="font-size:1.1rem; color:var(--hipg-navy);">${a.vin}</strong>
+                <span style="font-size:0.82rem; color:var(--hipg-muted);">(${a.model} — Vessel: <strong>${a.vessel_name || 'VIKING DRIVE'}</strong> [Voyage ${a.voyage || '41'}])</span>
+              </div>
+              <div style="font-size:0.8rem; color:#475569; margin-top:0.35rem;">
+                Submitted by: <strong>${a.created_by}</strong> on ${a.created_at} | Location: ${a.yard || 'Yard A'} (${a.row_lane || 'Block 1-Row 1'})
+              </div>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:0.45rem;">
+              ${secStatusBadge}
+              ${approveBtnHtml}
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+  } catch (err) {
+    console.error("Error fetching supervisor pending tallies:", err);
+  }
+}
+
+async function approveTallyAsSupervisor(vin) {
+  if (!confirm(`Are you sure you want to approve & lock Tally Sheet for VIN ${vin}?`)) return;
+
+  try {
+    const res = await fetch("/api/supervisor/approve-tally", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ vin: vin, user_id: currentUserRole })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert(`✅ Tally Sheet for VIN ${vin} OFFICIALLY APPROVED & LOCKED by Supervisor!`);
+      refreshSupervisorPendingTallies();
+      if (selectedVessel) loadChassisForVessel(selectedVessel.id);
+    } else {
+      alert(`⚠️ ${data.message}`);
+    }
+  } catch (err) {
+    console.error("Error approving tally:", err);
+    alert("Error approving tally sheet.");
   }
 }
 

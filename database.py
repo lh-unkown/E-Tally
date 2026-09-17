@@ -225,17 +225,48 @@ def seed_data(conn):
             'Surveyor 298', (now - timedelta(days=1, hours=2)).strftime("%Y-%m-%d %H:%M:%S")
         ))
 
+        # Seed Pending Tally 1: Security Verified (Supervisor can approve)
+        cursor.execute("""
+            INSERT INTO tally_sheets (vin, doc_ref, vessel_id, tally_type, status, accessories_json, damages_json, photos_json, remarks, created_by, created_at)
+            VALUES (?, ?, ?, ?, 'Pending Approval', ?, ?, ?, ?, ?, ?)
+        """, (
+            'ZVW30-5849102', '20586', 'VSL001', 'ONBOARD',
+            json.dumps(accessories_sample_1), json.dumps([]), json.dumps([]),
+            'Inspection completed onboard.', 'Surveyor 298', now_str
+        ))
+        cursor.execute("UPDATE chassis SET tally_status = 'Pending Approval' WHERE vin = 'ZVW30-5849102'")
+
+        # Seed Pending Tally 2: Security Check NOT Done (Supervisor CANNOT approve yet)
+        cursor.execute("""
+            INSERT INTO tally_sheets (vin, doc_ref, vessel_id, tally_type, status, accessories_json, damages_json, photos_json, remarks, created_by, created_at)
+            VALUES (?, ?, ?, ?, 'Pending Approval', ?, ?, ?, ?, ?, ?)
+        """, (
+            'NKE165-3819204', '20586', 'VSL001', 'ONBOARD',
+            json.dumps(accessories_sample_1), json.dumps([]), json.dumps([]),
+            'Deck 1 Discharge Tally completed.', 'Surveyor 298', now_str
+        ))
+        cursor.execute("UPDATE chassis SET tally_status = 'Pending Approval' WHERE vin = 'NKE165-3819204'")
+
         cursor.execute("""
             INSERT INTO security_checks (vin, status, discrepancies_json, remarks, checked_by, checked_at)
             VALUES (?, ?, ?, ?, ?, ?)
         """, ('RV5-1268273', 'Verified', json.dumps([]), 'Condition matches tally sheet accurately.', 'Security 5958', now.strftime("%Y-%m-%d 16:00:00")))
+
+        # Security Check completed for ZVW30-5849102
+        cursor.execute("""
+            INSERT INTO security_checks (vin, status, discrepancies_json, remarks, checked_by, checked_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, ('ZVW30-5849102', 'Verified', json.dumps([]), 'Discharge security check verified clean.', 'Security 5958', now_str))
 
         audit_entries = [
             ('RV5-1268273', 'Onboard', '298', 'Surveyor', (now - timedelta(days=1)).strftime("%Y-%m-%d 14:50:00"), 'Tally Sheet Issued Doc Ref 20586'),
             ('RV5-1268273', 'Yard Shift', '60664', 'Driver', (now - timedelta(days=1)).strftime("%Y-%m-%d 15:00:00"), 'Discharged from vessel to Yard A'),
             ('RV5-1268273', 'Update', '352', 'Supervisor', now.strftime("%Y-%m-%d 10:50:00"), 'Approved accessories update'),
             ('RV5-1268273', 'Delivery', 'TR14', 'Driver', now.strftime("%Y-%m-%d 23:20:00"), 'HHT scan before gate delivery'),
-            ('RV5-1268273', 'Security', '5958', 'Security', now.strftime("%Y-%m-%d 16:00:00"), 'Discharge condition verified')
+            ('RV5-1268273', 'Security', '5958', 'Security', now.strftime("%Y-%m-%d 16:00:00"), 'Discharge condition verified'),
+            ('ZVW30-5849102', 'Onboard', '298', 'Surveyor', now_str, 'Tally Sheet Submitted for Approval'),
+            ('ZVW30-5849102', 'Security', '5958', 'Security', now_str, 'Security Verification Completed'),
+            ('NKE165-3819204', 'Onboard', '298', 'Surveyor', now_str, 'Tally Sheet Submitted for Approval')
         ]
         cursor.executemany("INSERT INTO audit_trail (vin, work_point, user_id, user_role, timestamp, details) VALUES (?,?,?,?,?,?)", audit_entries)
 

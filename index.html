@@ -113,6 +113,20 @@
         <!-- 1.1 ON-BOARD TALLY WORKFLOW -->
         <div id="subViewOnboard">
 
+          <!-- SUPERVISOR PENDING TALLY APPROVALS PANEL -->
+          <div id="supervisorPendingPanel" class="card-panel hidden" style="background: #FFFBEB; border: 1.5px solid #F59E0B; margin-bottom: 1.5rem;">
+            <div class="card-title" style="color: #92400E; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+              <span>⏳ Pending Tally Sheet Approvals for Supervisor</span>
+              <button class="btn btn-outline" style="padding: 0.25rem 0.6rem; font-size: 0.78rem; background: #FFF;" onclick="refreshSupervisorPendingTallies()">🔄 Refresh Pending List</button>
+            </div>
+            <p style="font-size: 0.85rem; color: #78350F; margin-bottom: 0.75rem;">
+              The following tally sheets were submitted by Surveyors. <strong>Note:</strong> Approvals require Security Officer Security Check (status <code>Verified</code>).
+            </p>
+            <div id="supervisorPendingListContainer">
+              <!-- Pending Tally Cards Rendered via JS -->
+            </div>
+          </div>
+
           <!-- Workflow Step Indicator -->
           <div class="card-panel" style="background: #F1F5F9; padding: 0.75rem 1rem;">
             <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 0.85rem; color: var(--hipg-navy);">

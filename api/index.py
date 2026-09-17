@@ -138,6 +138,25 @@ class handler(BaseHTTPRequestHandler):
                 recent = [dict(r) for r in cursor.fetchall()]
                 return self.send_json({"success": True, "outbox_counts": counts, "recent_events": recent})
 
+            elif path.endswith("/api/supervisor/pending-tallies"):
+                cursor.execute("""
+                    SELECT t.vin, t.doc_ref, t.vessel_id, t.tally_type, t.status as tally_doc_status, 
+                           t.created_by, t.created_at, c.model, c.yard, c.row_lane, v.name as vessel_name, v.voyage,
+                           s.status as security_status, s.checked_by as security_checked_by, s.checked_at as security_checked_at
+                    FROM tally_sheets t
+                    JOIN chassis c ON t.vin = c.vin
+                    LEFT JOIN vessels v ON c.vessel_id = v.id
+                    LEFT JOIN security_checks s ON t.vin = s.vin
+                    WHERE t.status IN ('Pending Approval', 'Draft', 'In Progress') OR c.tally_status IN ('Pending Approval', 'In Progress')
+                    ORDER BY t.id DESC
+                """)
+                rows = []
+                for r in cursor.fetchall():
+                    d = dict(r)
+                    d["can_approve"] = (d.get("security_status") == "Verified")
+                    rows.append(d)
+                return self.send_json({"success": True, "pending_tallies": rows})
+
             else:
                 return self.send_json({"success": False, "message": f"Unknown API endpoint: {path}"}, 404)
 
@@ -178,6 +197,34 @@ class handler(BaseHTTPRequestHandler):
             elif path.endswith("/api/external/manifest"):
                 res = sync_engine.import_vessel_manifest(data)
                 return self.send_json(res)
+
+            elif path.endswith("/api/supervisor/approve-tally"):
+                vin = data.get("vin")
+                user_id = data.get("user_id", "Supervisor 352")
+
+                cursor.execute("SELECT status FROM security_checks WHERE vin = ?", (vin,))
+                sec_row = cursor.fetchone()
+                sec_status = sec_row["status"] if sec_row else None
+
+                if sec_status != "Verified":
+                    return self.send_json({"success": False, "message": f"Cannot approve tally for VIN {vin}: Pending Security Officer Verification."}, 400)
+
+                cursor.execute("UPDATE tally_sheets SET status = 'Confirmed', confirmed_by = ?, confirmed_at = ? WHERE vin = ?", (user_id, now_str, vin))
+                cursor.execute("UPDATE chassis SET tally_status = 'Confirmed' WHERE vin = ?", (vin,))
+                cursor.execute("""
+                    INSERT INTO audit_trail (vin, work_point, user_id, user_role, timestamp, details)
+                    VALUES (?, 'Supervisor Approval', ?, 'Supervisor', ?, 'TALLY OFFICIALLY APPROVED & LOCKED BY SUPERVISOR')
+                """, (vin, user_id, now_str))
+
+                database.queue_sync_event(cursor, "TALLY_CONFIRMED", vin, {
+                    "vin": vin,
+                    "status": "Confirmed",
+                    "approved_by": user_id,
+                    "timestamp": now_str
+                })
+
+                conn.commit()
+                return self.send_json({"success": True, "message": f"Tally sheet for VIN '{vin}' officially approved and locked by Supervisor."})
 
             elif path.endswith("/api/users"):
                 username = data.get("username", "").strip()
