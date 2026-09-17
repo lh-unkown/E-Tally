@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F4C67" />
+      <stop offset="100%" stop-color="#093549" />
+    </linearGradient>
+  </defs>
+  <!-- Background Tile -->
+  <rect width="512" height="512" rx="100" fill="url(#bgGrad)" />
+  
+  <!-- Ship Shield Emblem -->
+  <g transform="translate(256, 195) scale(1.5)">
+    <!-- Outer Shield -->
+    <path d="M 0 -65 C 35 -65 50 -55 50 -25 C 50 25 20 60 0 75 C -20 60 -50 25 -50 -25 C -50 -55 -35 -65 0 -65 Z" fill="#0F4C67" stroke="#FFFFFF" stroke-width="8" />
+    <!-- Ship Silhouette -->
+    <path d="M 0 -40 L 26 8 L -26 8 Z" fill="#FFFFFF" />
+    <path d="M 0 -40 L 0 30 L 20 8 Z" fill="#E0F2FE" />
+    <!-- Waves -->
+    <path d="M -30 18 Q 0 28 30 18" stroke="#FFFFFF" stroke-width="6" fill="none" stroke-linecap="round" />
+    <path d="M -22 34 Q 0 42 22 34" stroke="#38BDF8" stroke-width="5" fill="none" stroke-linecap="round" />
+  </g>
+  
+  <!-- HIPG Typography -->
+  <text x="256" y="425" font-family="'Segoe UI', Arial, sans-serif" font-weight="900" font-size="105" fill="#FFFFFF" text-anchor="middle" letter-spacing="4">HIPG</text>
+  
+  <!-- Gold CM Emblem -->
+  <circle cx="420" cy="90" r="32" fill="#C5A059" stroke="#FFFFFF" stroke-width="4"/>
+  <text x="420" y="98" font-family="Arial, sans-serif" font-weight="bold" font-size="22" fill="#FFFFFF" text-anchor="middle">CM</text>
+</svg>
