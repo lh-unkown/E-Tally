@@ -97,11 +97,8 @@ function applyRoleRestrictions(user) {
   if (role === "Admin") {
     if (tabAdminBtn) tabAdminBtn.classList.remove("hidden");
     switchMainTab("issue");
-  } else if (role === "Supervisor") {
-    if (tabAdminBtn) tabAdminBtn.classList.add("hidden");
-    switchMainTab("issue");
     switchSubTab("onboard");
-  } else if (role === "Surveyor") {
+  } else if (role === "Supervisor" || role === "Surveyor") {
     if (tabAdminBtn) tabAdminBtn.classList.add("hidden");
     if (subTabSecurityBtn) subTabSecurityBtn.classList.add("hidden");
     switchMainTab("issue");
@@ -112,6 +109,7 @@ function applyRoleRestrictions(user) {
     if (subTabOnboardBtn) subTabOnboardBtn.classList.add("hidden");
     if (subTabExportBtn) subTabExportBtn.classList.add("hidden");
     if (subTabUpdateBtn) subTabUpdateBtn.classList.add("hidden");
+    if (subTabSecurityBtn) subTabSecurityBtn.classList.remove("hidden");
     switchMainTab("issue");
     switchSubTab("security");
   } else if (role === "Driver") {
