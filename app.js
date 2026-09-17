@@ -10,6 +10,7 @@ let currentChassisList = [];
 let selectedVessel = null;
 let selectedChassis = null;
 let currentTallyMode = "MANUAL";
+let isCurrentTallyReadOnly = false;
 
 let activeTallyData = { accessories: {}, damages: [], photos: [], remarks: "", doc_ref: "20586" };
 let recordedDamages = [];
@@ -541,6 +542,8 @@ async function selectChassis(chassis) {
   document.getElementById("activeVinModelLabel").innerText = `(${chassis.model} - ${chassis.color})`;
   document.getElementById("activeVinTallyStatus").innerText = chassis.tally_status;
 
+  let isVerifiedRecord = false;
+
   try {
     const res = await fetch(`/api/tally/${chassis.vin}`);
     const data = await res.json();
@@ -551,6 +554,10 @@ async function selectChassis(chassis) {
       activeTallyData.remarks = data.tally.remarks || "";
       recordedDamages = [...activeTallyData.damages];
       savedPhotos = [...activeTallyData.photos];
+
+      if (data.tally.status === 'Verified' || data.tally.status === 'Confirmed' || chassis.tally_status === 'Verified' || chassis.tally_status === 'Confirmed' || (data.security && data.security.status === 'Verified')) {
+        isVerifiedRecord = true;
+      }
     } else {
       activeTallyData.accessories = {};
       activeTallyData.damages = [];
@@ -558,10 +565,19 @@ async function selectChassis(chassis) {
       activeTallyData.remarks = "";
       recordedDamages = [];
       savedPhotos = [];
+
+      if (chassis.tally_status === 'Verified' || chassis.tally_status === 'Confirmed') {
+        isVerifiedRecord = true;
+      }
     }
   } catch (err) {
     console.error("Error fetching chassis tally:", err);
   }
+
+  const isAdmin = currentUser && currentUser.role === "Admin";
+  isCurrentTallyReadOnly = isVerifiedRecord && !isAdmin;
+
+  applyTallyFormReadonlyState(isVerifiedRecord, isAdmin);
 
   renderAccessoriesChecklist();
   renderRecordedDamages();
@@ -569,7 +585,82 @@ async function selectChassis(chassis) {
   goToStep('accessories');
 }
 
+function applyTallyFormReadonlyState(isVerifiedRecord, isAdmin) {
+  let bannerContainer = document.getElementById("tallyReadonlyStatusBanner");
+  if (!bannerContainer) {
+    bannerContainer = document.createElement("div");
+    bannerContainer.id = "tallyReadonlyStatusBanner";
+    const stepAcc = document.getElementById("stepAccessories");
+    if (stepAcc && stepAcc.children.length > 1) {
+      stepAcc.insertBefore(bannerContainer, stepAcc.children[1]);
+    }
+  }
+
+  const isReadOnly = isVerifiedRecord && !isAdmin;
+
+  if (isReadOnly) {
+    bannerContainer.style.cssText = "background:#FEF2F2; border:2px solid #EF4444; padding:0.85rem 1rem; border-radius:8px; margin-bottom:1rem; color:#991B1B; font-size:0.9rem;";
+    bannerContainer.innerHTML = `
+      <strong>🔒 VERIFIED RECORD (VIEW ONLY)</strong><br>
+      This vehicle record is <strong>Verified & Locked</strong>. Only <strong>Admin users</strong> are authorized to edit or delete verified records. Supervisors and Surveyors have View-Only access.
+    `;
+  } else if (isVerifiedRecord && isAdmin) {
+    bannerContainer.style.cssText = "background:#EFF6FF; border:2px solid #3B82F6; padding:0.85rem 1rem; border-radius:8px; margin-bottom:1rem; color:#1E3A8A; font-size:0.9rem; display:flex; justify-content:space-between; align-items:center;";
+    bannerContainer.innerHTML = `
+      <div>
+        <strong>✏️ VERIFIED RECORD (ADMIN EDIT & DELETE MODE)</strong><br>
+        You are logged in as <strong>Admin</strong>. You have full authorization to edit or delete this verified record.
+      </div>
+      <button class="btn btn-danger" style="padding:0.4rem 0.85rem; font-size:0.82rem; font-weight:700;" onclick="adminPurgeCurrentChassis('${selectedChassis ? selectedChassis.vin : ''}')">🗑️ Delete Verified Record</button>
+    `;
+  } else {
+    bannerContainer.style.cssText = "display:none;";
+    bannerContainer.innerHTML = "";
+  }
+
+  const btnAiMode = document.getElementById("btnAiMode");
+  const btnManualMode = document.getElementById("btnManualMode");
+  const damageTypeSelect = document.getElementById("damageTypeSelect");
+  const damageLocationInput = document.getElementById("damageLocationInput");
+  const btnAddDamage = document.querySelector("button[onclick='addRecordedDamage()']");
+  const photoFileInput = document.getElementById("photoFileInput");
+  const btnClearCanvas = document.querySelector("button[onclick='clearCanvas()']");
+  const btnSavePhoto = document.querySelector("button[onclick='saveAnnotatedPhoto()']");
+  const tallyRemarksInput = document.getElementById("tallyRemarksInput");
+  const btnConfirmFinalTally = document.querySelector("button[onclick='confirmFinalTallySheet()']");
+
+  if (btnAiMode) btnAiMode.disabled = isReadOnly;
+  if (btnManualMode) btnManualMode.disabled = isReadOnly;
+  if (damageTypeSelect) damageTypeSelect.disabled = isReadOnly;
+  if (damageLocationInput) damageLocationInput.disabled = isReadOnly;
+  if (btnAddDamage) btnAddDamage.disabled = isReadOnly;
+  if (photoFileInput) photoFileInput.disabled = isReadOnly;
+  if (btnClearCanvas) btnClearCanvas.disabled = isReadOnly;
+  if (btnSavePhoto) btnSavePhoto.disabled = isReadOnly;
+  if (tallyRemarksInput) tallyRemarksInput.disabled = isReadOnly;
+
+  if (btnConfirmFinalTally) {
+    if (isReadOnly) {
+      btnConfirmFinalTally.disabled = true;
+      btnConfirmFinalTally.style.opacity = "0.5";
+      btnConfirmFinalTally.style.cursor = "not-allowed";
+      btnConfirmFinalTally.innerHTML = "🔒 Record Verified (View Only)";
+    } else if (isVerifiedRecord && isAdmin) {
+      btnConfirmFinalTally.disabled = false;
+      btnConfirmFinalTally.style.opacity = "1";
+      btnConfirmFinalTally.style.cursor = "pointer";
+      btnConfirmFinalTally.innerHTML = "💾 Update Verified Record (Admin Override)";
+    } else {
+      btnConfirmFinalTally.disabled = false;
+      btnConfirmFinalTally.style.opacity = "1";
+      btnConfirmFinalTally.style.cursor = "pointer";
+      btnConfirmFinalTally.innerHTML = "🔒 Confirm & Lock Tally Sheet";
+    }
+  }
+}
+
 function toggleTallyMode(mode) {
+  if (isCurrentTallyReadOnly) return alert("Access Denied: Verified records are View-Only for non-Admin users.");
   currentTallyMode = mode;
   document.getElementById("currentModeBadge").innerText = `${mode} MODE`;
 
@@ -582,6 +673,7 @@ function toggleTallyMode(mode) {
 }
 
 async function runAiPhotoAutoFill() {
+  if (isCurrentTallyReadOnly) return alert("Access Denied: Verified records are View-Only for non-Admin users.");
   try {
     const res = await fetch("/api/tally/ai-scan", {
       method: "POST",
@@ -608,8 +700,9 @@ function renderAccessoriesChecklist() {
     const itemDiv = document.createElement("div");
     itemDiv.className = "check-item";
 
+    const disabledAttr = isCurrentTallyReadOnly ? 'disabled' : '';
     itemDiv.innerHTML = `
-      <input type="checkbox" id="acc_${item}" ${isChecked ? 'checked' : ''} onchange="onAccessoryCheckChange('${item}', this.checked)">
+      <input type="checkbox" id="acc_${item}" ${isChecked ? 'checked' : ''} ${disabledAttr} onchange="onAccessoryCheckChange('${item}', this.checked)">
       <label for="acc_${item}" style="cursor: pointer; flex: 1;">${item}</label>
     `;
     grid.appendChild(itemDiv);
@@ -617,6 +710,7 @@ function renderAccessoriesChecklist() {
 }
 
 function onAccessoryCheckChange(itemKey, isChecked) {
+  if (isCurrentTallyReadOnly) return;
   activeTallyData.accessories[itemKey] = isChecked;
 }
 
@@ -637,6 +731,7 @@ function renderDamageCodes() {
     badge.className = "damage-code-badge";
     badge.innerText = d.name;
     badge.onclick = () => {
+      if (isCurrentTallyReadOnly) return;
       document.getElementById("damageTypeSelect").value = `${d.code}-${d.name.split('-')[1]}`;
     };
     container.appendChild(badge);
@@ -644,6 +739,7 @@ function renderDamageCodes() {
 }
 
 function addRecordedDamage() {
+  if (isCurrentTallyReadOnly) return alert("Access Denied: Verified records are View-Only for non-Admin users.");
   const typeVal = document.getElementById("damageTypeSelect").value;
   const locVal = document.getElementById("damageLocationInput").value.trim();
 
@@ -674,15 +770,17 @@ function renderRecordedDamages() {
   recordedDamages.forEach((d, idx) => {
     const li = document.createElement("li");
     li.style.cssText = "font-size: 0.85rem; padding: 0.3rem 0; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center;";
+    const deleteBtn = isCurrentTallyReadOnly ? "" : `<button style="border:none; background:none; color:red; cursor:pointer;" onclick="removeDamage(${idx})">❌</button>`;
     li.innerHTML = `
       <span>🔴 <strong>Code ${d.code} (${d.type}):</strong> ${d.location}</span>
-      <button style="border:none; background:none; color:red; cursor:pointer;" onclick="removeDamage(${idx})">❌</button>
+      ${deleteBtn}
     `;
     list.appendChild(li);
   });
 }
 
 function removeDamage(index) {
+  if (isCurrentTallyReadOnly) return;
   recordedDamages.splice(index, 1);
   activeTallyData.damages = recordedDamages;
   renderRecordedDamages();
@@ -773,6 +871,7 @@ function clearCanvas() {
 }
 
 function saveAnnotatedPhoto() {
+  if (isCurrentTallyReadOnly) return alert("Access Denied: Verified records are View-Only for non-Admin users.");
   if (!canvasImageLoaded) {
     alert("Please upload a photo first before saving annotation.");
     return;
@@ -800,22 +899,25 @@ function renderSavedPhotosGallery() {
   savedPhotos.forEach((p, idx) => {
     const card = document.createElement("div");
     card.className = "photo-card";
+    const deleteBtnHtml = isCurrentTallyReadOnly ? "" : `<button style="width:100%; border:none; background:#DC2626; color:white; font-size:0.7rem; padding:0.2rem; cursor:pointer;" onclick="removePhoto(${idx})">Delete</button>`;
     card.innerHTML = `
       <img src="${p.url}" alt="Damage Photo">
       <div class="photo-caption">${p.caption}</div>
-      <button style="width:100%; border:none; background:#DC2626; color:white; font-size:0.7rem; padding:0.2rem; cursor:pointer;" onclick="removePhoto(${idx})">Delete</button>
+      ${deleteBtnHtml}
     `;
     gallery.appendChild(card);
   });
 }
 
 function removePhoto(idx) {
+  if (isCurrentTallyReadOnly) return;
   savedPhotos.splice(idx, 1);
   activeTallyData.photos = savedPhotos;
   renderSavedPhotosGallery();
 }
 
 async function confirmFinalTallySheet() {
+  if (isCurrentTallyReadOnly) return alert("Access Denied: Verified records are View-Only for non-Admin users.");
   if (!selectedChassis) {
     alert("No chassis selected.");
     return;
@@ -836,7 +938,8 @@ async function confirmFinalTallySheet() {
     damages: activeTallyData.damages,
     photos: activeTallyData.photos,
     remarks: activeTallyData.remarks,
-    user_id: currentUserRole
+    user_id: currentUserRole,
+    user_role: currentUser ? currentUser.role : "Surveyor"
   };
 
   try {
@@ -1163,11 +1266,25 @@ async function runInquireSearch(preQuery) {
       const tallyRes = await fetch(`/api/tally/${chassis.vin}`);
       const tallyData = await tallyRes.json();
 
+      const isVerified = (chassis.tally_status === 'Verified' || chassis.tally_status === 'Confirmed' || (tallyData.tally && (tallyData.tally.status === 'Verified' || tallyData.tally.status === 'Confirmed')) || (tallyData.security && tallyData.security.status === 'Verified'));
+      const isAdmin = currentUser && currentUser.role === "Admin";
+
+      let adminActionButtons = "";
+      if (isVerified && isAdmin) {
+        adminActionButtons = `
+          <button class="btn btn-warning" style="padding:0.4rem 0.8rem; font-size:0.8rem; font-weight:700;" onclick="adminEditTallyFromInquire('${chassis.vin}')">✏️ Edit Record (Admin)</button>
+          <button class="btn btn-danger" style="padding:0.4rem 0.8rem; font-size:0.8rem; font-weight:700;" onclick="adminPurgeCurrentChassis('${chassis.vin}')">🗑️ Delete Record (Admin)</button>
+        `;
+      } else if (isVerified && !isAdmin) {
+        adminActionButtons = `<span class="status-pill verified" style="padding:0.45rem 0.85rem; font-size:0.8rem;">🔒 Verified Record (View Only)</span>`;
+      }
+
       const container = document.getElementById("inquireResultsContainer");
       container.innerHTML = `
         <div style="margin-bottom: 1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
           <h3 style="color:var(--hipg-navy);">Digital e-Tally Record: ${chassis.vin}</h3>
-          <div style="display:flex; gap:0.5rem;">
+          <div style="display:flex; gap:0.5rem; align-items:center;">
+            ${adminActionButtons}
             <button class="btn btn-outline" onclick="printCurrentTallySheet()">🖨️ Print Tally Sheet</button>
             <button class="btn btn-success" onclick="downloadSinglePdf('${chassis.vin}')">📥 Download PDF Tally Sheet</button>
           </div>
@@ -1184,6 +1301,37 @@ async function runInquireSearch(preQuery) {
     }
   } catch (err) {
     console.error("Inquire search error:", err);
+  }
+}
+
+function adminEditTallyFromInquire(vin) {
+  const chassis = currentChassisList.find(c => c.vin === vin) || { vin: vin, last_6: vin.slice(-6), model: "Vehicle", color: "Color", tally_status: "Verified" };
+  switchMainTab('issue');
+  selectChassis(chassis);
+}
+
+async function adminPurgeCurrentChassis(vin) {
+  const targetVin = vin || (selectedChassis ? selectedChassis.vin : "");
+  if (!targetVin) return alert("No VIN selected.");
+  if (!confirm(`CAUTION ADMIN: Are you sure you want to PERMANENTLY DELETE the verified tally sheet for VIN ${targetVin}?`)) return;
+
+  try {
+    const res = await fetch("/api/admin/override-tally", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ vin: targetVin, action: "DELETE", admin_id: currentUserRole })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert(`🗑️ Tally Sheet record for VIN ${targetVin} deleted by Admin.`);
+      if (selectedVessel) loadChassisForVessel(selectedVessel.id);
+      switchMainTab('issue');
+      goToStep('chassis');
+    } else {
+      alert(`⚠️ ${data.message}`);
+    }
+  } catch (err) {
+    console.error("Admin purge error:", err);
   }
 }
 

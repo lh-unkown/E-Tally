@@ -286,10 +286,19 @@ class ETallyRequestHandler(http.server.SimpleHTTPRequestHandler):
                 remarks = data.get("remarks", "")
                 user_id = data.get("user_id", "Surveyor 298")
 
-                cursor.execute("SELECT id FROM tally_sheets WHERE vin = ?", (vin,))
+                cursor.execute("SELECT id, status FROM tally_sheets WHERE vin = ?", (vin,))
                 existing = cursor.fetchone()
 
                 if existing:
+                    existing_status = existing["status"]
+                    user_role = data.get("role") or data.get("user_role") or ""
+                    user_id = data.get("user_id", "")
+                    if existing_status in ("Verified", "Confirmed") and user_role != "Admin" and "Admin" not in user_id:
+                        return self.send_json({
+                            "success": False,
+                            "message": f"Access Denied: Record for VIN '{vin}' is Verified & Locked. Only Admin users can edit or modify verified records."
+                        }, 403)
+
                     cursor.execute("""
                         UPDATE tally_sheets 
                         SET status = ?, accessories_json = ?, damages_json = ?, photos_json = ?, remarks = ?, confirmed_by = ?, confirmed_at = ?
