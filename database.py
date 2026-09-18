@@ -144,6 +144,17 @@ def init_db():
         )
     """)
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS accessories_master (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            item_key TEXT UNIQUE NOT NULL,
+            item_label TEXT NOT NULL,
+            category TEXT DEFAULT 'GENERAL',
+            status TEXT DEFAULT 'ACTIVE',
+            created_at TEXT
+        )
+    """)
+
     conn.commit()
     seed_data(conn)
     conn.close()
@@ -170,6 +181,40 @@ def seed_data(conn):
             ('driver60664', 'Driver 60664', 'Driver', 'pass123', 'ACTIVE', now_str),
         ]
         cursor.executemany("INSERT INTO users (username, name, role, password, status, created_at) VALUES (?,?,?,?,?,?)", users)
+
+    # Seed Accessories Master
+    cursor.execute("SELECT COUNT(*) FROM accessories_master")
+    if cursor.fetchone()[0] == 0:
+        std_items = [
+            ("MONO GRAM", "MONO GRAM", "GENERAL"),
+            ("WIPERS", "WIPERS", "GENERAL"),
+            ("TOW CAP", "TOW CAP", "GENERAL"),
+            ("SIDE MIRROR - RIGHT", "SIDE MIRROR - RIGHT", "GENERAL"),
+            ("SIDE MIRROR - LEFT", "SIDE MIRROR - LEFT", "GENERAL"),
+            ("HUB CAPS", "HUB CAPS", "WHEELS"),
+            ("WHEEL CUP", "WHEEL CUP", "WHEELS"),
+            ("ANTENNA", "ANTENNA", "GENERAL"),
+            ("SPARE TYRE", "SPARE TYRE", "WHEELS"),
+            ("WHEEL BRUSH", "WHEEL BRUSH", "TOOLS"),
+            ("JACK", "JACK", "TOOLS"),
+            ("TOOL KIT", "TOOL KIT", "TOOLS"),
+            ("AIR PUMP", "AIR PUMP", "TOOLS"),
+            ("GUM BOTTLE", "GUM BOTTLE", "TOOLS"),
+            ("REVERSE CAMERA", "REVERSE CAMERA", "INTERIOR"),
+            ("ALLOY", "ALLOY WHEEL", "WHEELS"),
+            ("A_C_NOB", "A/C NOB", "INTERIOR"),
+            ("GEAR NOB", "GEAR NOB", "INTERIOR"),
+            ("CAR AUDIO", "CAR AUDIO", "INTERIOR"),
+            ("TV SCREEN - FRONT", "TV SCREEN - FRONT", "INTERIOR"),
+            ("TV SCREEN - REAR", "TV SCREEN - REAR", "INTERIOR"),
+            ("CARPETS", "CARPETS", "INTERIOR"),
+            ("DR CAMERA", "DR CAMERA", "INTERIOR"),
+            ("PERSONNEL PKG", "PERSONNEL PKG", "GENERAL"),
+            ("NORMAL_KEY", "NORMAL KEY", "KEYS"),
+            ("REMOTE_KEY", "REMOTE KEY", "KEYS"),
+            ("SMART_KEY", "SMART KEY", "KEYS")
+        ]
+        cursor.executemany("INSERT INTO accessories_master (item_key, item_label, category, created_at) VALUES (?,?,?,'2026-09-17 12:00:00')", std_items)
 
     # Seed Vessels
     cursor.execute("SELECT COUNT(*) FROM vessels")

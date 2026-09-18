@@ -190,6 +190,11 @@ class ETallyRequestHandler(http.server.SimpleHTTPRequestHandler):
                     rows.append(d)
                 return self.send_json({"success": True, "pending_tallies": rows})
 
+            elif path == "/api/accessories":
+                cursor.execute("SELECT * FROM accessories_master WHERE status = 'ACTIVE' ORDER BY id ASC")
+                rows = [dict(r) for r in cursor.fetchall()]
+                return self.send_json({"success": True, "accessories": rows})
+
             else:
                 return self.send_json({"success": False, "message": "Unknown API endpoint"}, 404)
 
@@ -394,7 +399,45 @@ class ETallyRequestHandler(http.server.SimpleHTTPRequestHandler):
                 cursor.execute("INSERT INTO chassis VALUES (?,?,?,?,?,?,?,?,?,?,'No Tally')",
                                (vin, last_6, vessel_id, model, used, iid, color, 'Deck 1', yard, row_lane))
                 conn.commit()
-                return self.send_json({"success": True, "message": f"Chassis VIN '{vin}' added to BTOS registry."})
+                return self.send_json({"success": True, "message": f"Chassis '{vin}' registered in system."})
+
+            elif path == "/api/admin/accessories":
+                role = data.get("role") or data.get("user_role") or ""
+                user_id = data.get("user_id", "")
+                if role != "Admin" and "Admin" not in user_id:
+                    return self.send_json({"success": False, "message": "Access Denied: Only Admin users can modify checklist items."}, 403)
+
+                item_key = data.get("item_key", "").strip().upper()
+                item_label = data.get("item_label", "").strip() or item_key
+                category = data.get("category", "GENERAL").strip().upper()
+                old_key = data.get("old_key", "").strip().upper()
+
+                if not item_key:
+                    return self.send_json({"success": False, "message": "Item key/name is required."}, 400)
+
+                if old_key:
+                    cursor.execute("UPDATE accessories_master SET item_key = ?, item_label = ?, category = ? WHERE item_key = ?", (item_key, item_label, category, old_key))
+                    msg = f"Checklist item '{old_key}' updated to '{item_key}'."
+                else:
+                    cursor.execute("INSERT OR REPLACE INTO accessories_master (item_key, item_label, category, status, created_at) VALUES (?, ?, ?, 'ACTIVE', ?)", (item_key, item_label, category, now_str))
+                    msg = f"New checklist item '{item_key}' added successfully."
+
+                conn.commit()
+                return self.send_json({"success": True, "message": msg, "item_key": item_key})
+
+            elif path == "/api/admin/accessories/delete":
+                role = data.get("role") or data.get("user_role") or ""
+                user_id = data.get("user_id", "")
+                if role != "Admin" and "Admin" not in user_id:
+                    return self.send_json({"success": False, "message": "Access Denied: Only Admin users can delete checklist items."}, 403)
+
+                item_key = data.get("item_key", "").strip().upper()
+                if not item_key:
+                    return self.send_json({"success": False, "message": "Item key is required."}, 400)
+
+                cursor.execute("DELETE FROM accessories_master WHERE item_key = ?", (item_key,))
+                conn.commit()
+                return self.send_json({"success": True, "message": f"Checklist item '{item_key}' deleted successfully."})
 
             elif path == "/api/tally/ai-scan":
                 detected_items = {

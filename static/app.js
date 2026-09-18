@@ -67,7 +67,7 @@ function unlockSystemForUser(user) {
 
   initCanvas();
   loadVessels();
-  renderAccessoriesChecklist();
+  loadMasterAccessories().then(() => renderAccessoriesChecklist());
   renderDamageCodes();
   runInquireSearch(""); // Empty query on login: do not show any VIN until user searches
 }
@@ -781,22 +781,137 @@ async function runAiPhotoAutoFill() {
   }
 }
 
+async function loadMasterAccessories() {
+  try {
+    const res = await fetch("/api/accessories");
+    const data = await res.json();
+    if (data.success && data.accessories.length > 0) {
+      STANDARD_ACCESSORIES = data.accessories.map(a => a.item_key);
+    }
+  } catch (err) {
+    console.error("Error loading master accessories:", err);
+  }
+}
+
 function renderAccessoriesChecklist() {
   const grid = document.getElementById("accessoriesChecklistGrid");
+  if (!grid) return;
   grid.innerHTML = "";
+
+  const isAdmin = currentUser && currentUser.role === "Admin";
+
+  let adminControlBar = document.getElementById("adminAccessoryControlBar");
+  if (isAdmin) {
+    if (!adminControlBar) {
+      adminControlBar = document.createElement("div");
+      adminControlBar.id = "adminAccessoryControlBar";
+      grid.parentNode.insertBefore(adminControlBar, grid);
+    }
+    adminControlBar.style.cssText = "background:#EEF2FF; border:1px solid #C7D2FE; padding:0.75rem 1rem; border-radius:8px; margin-bottom:1.25rem; display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;";
+    adminControlBar.innerHTML = `
+      <span style="font-size:0.88rem; font-weight:700; color:#3730A3;">⚙️ Admin Checklist Customizer:</span>
+      <input type="text" id="adminNewAccessoryInput" class="form-control" style="flex:1; min-width:220px; padding:0.4rem 0.75rem; font-size:0.85rem;" placeholder="Enter New Checklist Item Name (e.g. PHONE HOLDER, DASHCAM)...">
+      <button class="btn btn-primary" style="padding:0.4rem 0.9rem; font-size:0.85rem; font-weight:700;" onclick="adminAddAccessoryItem()">➕ Add Checklist Item</button>
+    `;
+  } else if (adminControlBar) {
+    adminControlBar.style.display = "none";
+  }
 
   STANDARD_ACCESSORIES.forEach(item => {
     const isChecked = !!activeTallyData.accessories[item];
     const itemDiv = document.createElement("div");
     itemDiv.className = "check-item";
+    itemDiv.style.cssText = "display:flex; justify-content:space-between; align-items:center;";
 
     const disabledAttr = isCurrentTallyReadOnly ? 'disabled' : '';
+
+    const adminItemControls = isAdmin ? `
+      <div style="display:flex; gap:0.2rem; margin-left:0.4rem;">
+        <button title="Rename Item" style="border:none; background:none; cursor:pointer; font-size:0.78rem; padding:1px 3px;" onclick="adminRenameAccessoryItem('${item}')">✏️</button>
+        <button title="Delete Item" style="border:none; background:none; color:red; cursor:pointer; font-size:0.78rem; padding:1px 3px;" onclick="adminDeleteAccessoryItem('${item}')">🗑️</button>
+      </div>
+    ` : '';
+
     itemDiv.innerHTML = `
-      <input type="checkbox" id="acc_${item}" ${isChecked ? 'checked' : ''} ${disabledAttr} onchange="onAccessoryCheckChange('${item}', this.checked)">
-      <label for="acc_${item}" style="cursor: pointer; flex: 1;">${item}</label>
+      <div style="display:flex; align-items:center; gap:0.4rem; flex:1;">
+        <input type="checkbox" id="acc_${item}" ${isChecked ? 'checked' : ''} ${disabledAttr} onchange="onAccessoryCheckChange('${item}', this.checked)">
+        <label for="acc_${item}" style="cursor: pointer; flex: 1; margin:0;">${item}</label>
+      </div>
+      ${adminItemControls}
     `;
     grid.appendChild(itemDiv);
   });
+}
+
+async function adminAddAccessoryItem() {
+  const input = document.getElementById("adminNewAccessoryInput");
+  const name = input ? input.value.trim().toUpperCase() : "";
+  if (!name) return alert("Please enter a new checklist item name.");
+
+  try {
+    const res = await fetch("/api/admin/accessories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ item_key: name, item_label: name, role: currentUser ? currentUser.role : "Admin", user_id: currentUserRole })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert(`✅ ${data.message}`);
+      if (input) input.value = "";
+      await loadMasterAccessories();
+      renderAccessoriesChecklist();
+    } else {
+      alert(`⚠️ ${data.message}`);
+    }
+  } catch (err) {
+    console.error("Error adding accessory item:", err);
+  }
+}
+
+async function adminRenameAccessoryItem(oldKey) {
+  const newName = prompt(`Enter new name for checklist item '${oldKey}':`, oldKey);
+  if (!newName || newName.trim().toUpperCase() === oldKey) return;
+  const newKey = newName.trim().toUpperCase();
+
+  try {
+    const res = await fetch("/api/admin/accessories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ old_key: oldKey, item_key: newKey, item_label: newKey, role: currentUser ? currentUser.role : "Admin", user_id: currentUserRole })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert(`✅ ${data.message}`);
+      await loadMasterAccessories();
+      renderAccessoriesChecklist();
+    } else {
+      alert(`⚠️ ${data.message}`);
+    }
+  } catch (err) {
+    console.error("Error renaming accessory item:", err);
+  }
+}
+
+async function adminDeleteAccessoryItem(itemKey) {
+  if (!confirm(`Are you sure you want to PERMANENTLY DELETE checklist item '${itemKey}' from the master accessories list?`)) return;
+
+  try {
+    const res = await fetch("/api/admin/accessories/delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ item_key: itemKey, role: currentUser ? currentUser.role : "Admin", user_id: currentUserRole })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert(`🗑️ ${data.message}`);
+      await loadMasterAccessories();
+      renderAccessoriesChecklist();
+    } else {
+      alert(`⚠️ ${data.message}`);
+    }
+  } catch (err) {
+    console.error("Error deleting accessory item:", err);
+  }
 }
 
 function onAccessoryCheckChange(itemKey, isChecked) {
